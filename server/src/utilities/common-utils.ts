@@ -35,17 +35,20 @@ export const getCurrentDateAsString = () => {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}-${date.getMilliseconds()}`;
 }
 
+
+// TODO: investigate, why this function create 2 source code zips
 export const archiveSourceCode = async () => {
-    const pathToSourceCode = `${__dirname}/../../../codebases`;
-    fs.mkdir(pathToSourceCode, (err) => {
+    const pathToSourceCode = `${__dirname}/../../..`;
+    const pathToZipFile = `${pathToSourceCode}/codebases`;
+    fs.mkdir(pathToZipFile, { recursive: true }, (err) => {
         if (err) {
             return console.error(err);
         }
-        console.log(`Directory ${pathToSourceCode} created successfully!`);
+        console.log(`Directory ${pathToZipFile} created successfully!`);
     });
     const zipName : string = `codebase-${getCurrentDateAsString()}.zip`;
-    console.log(`Creating zip file: ${pathToSourceCode}/${zipName}`);
-    const output = fs.createWriteStream(`${pathToSourceCode}/${zipName}`);
+    console.log(`Creating zip file: ${pathToZipFile}/${zipName}`);
+    const output = fs.createWriteStream(`${pathToZipFile}/${zipName}`);
     const archive = archiver('zip', {
         zlib: { level: 9 } // Sets the compression level.
     });
@@ -56,7 +59,7 @@ export const archiveSourceCode = async () => {
     });
 
     output.on('end', function() {
-    console.log('Data has been drained');
+        console.log('Data has been drained');
     });
 
     archive.on('warning', function(err) {
@@ -75,11 +78,11 @@ export const archiveSourceCode = async () => {
     archive.pipe(output);
 
     console.log(`Adding package.json to the zip file: ${zipName}`);
-    archive.file('package.json', { name: 'package.json' });
+    archive.file(`${pathToSourceCode}/package.json`, { name: 'package.json' });
     console.log(`Adding src/node_modules to the zip file: ${zipName}`);
-    archive.directory('src/node_modules/', false);
+    archive.directory(`${pathToSourceCode}/node_modules/`, `node_modules`);
     console.log(`Adding src/dist to the zip file: ${zipName}`);
-    archive.directory('src/dist/', false);
+    archive.directory(`${pathToSourceCode}/dist/`, `dist`);
     await archive.finalize();
     console.log(`Zip file ${zipName} created`);
 

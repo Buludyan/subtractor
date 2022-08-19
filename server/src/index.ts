@@ -19,7 +19,7 @@ const main = async () => {
   // await myBucket.deploy();
   // await myBucket.undeploy();
   
-  archiveSourceCode();
+  await archiveSourceCode();
 }
 
 main()
