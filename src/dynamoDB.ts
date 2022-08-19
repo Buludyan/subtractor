@@ -28,5 +28,8 @@ export class DynamoTable<RecordType>
         // TODO: implement, create table here
         throw new Error(`Not implemented`);
     }
-
+    readonly purge = async () : Promise<void> => {
+        // TODO: implement, create table here
+        throw new Error(`Not implemented`);
+    }
 }
