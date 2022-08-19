@@ -1,8 +1,6 @@
 import * as AWS from 'aws-sdk';
 import { AWSError } from 'aws-sdk/lib/error';
-import * as Utils from './common-utils';
-import { isAwsError, callAws } from './aws-common-utils';
-import { assert } from 'console';
+import * as awsCommonUtils from './aws-common-utils';
 
 const s3Client: AWS.S3 = new AWS.S3({
     apiVersion: "2006-03-01",
@@ -14,7 +12,7 @@ export class S3Bucket
     constructor(private bucketName: string) {}
 
     readonly deploy = async () => {
-        return await callAws(
+        return await awsCommonUtils.callAws(
             async () : Promise<void> => {
                 // TODO: check other parameters
                 await s3Client.createBucket({ Bucket: this.bucketName }).promise();
@@ -31,7 +29,7 @@ export class S3Bucket
           
     }
     readonly undeploy = async () => {
-        return await callAws(
+        return await awsCommonUtils.callAws(
             async () : Promise<void> => {
                 // TODO: check other parameters
                 await s3Client.deleteBucket({ Bucket: this.bucketName }).promise();

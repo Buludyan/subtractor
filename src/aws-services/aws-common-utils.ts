@@ -1,5 +1,5 @@
 import { AWSError } from "aws-sdk/lib/error";
-import * as Utils from "./common-utils";
+import * as Utils from "../utilities/common-utils";
 
 
 

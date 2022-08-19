@@ -1,7 +1,4 @@
 import * as AWS from 'aws-sdk';
-import { AWSError } from 'aws-sdk/lib/error';
-import * as Utils from './common-utils';
-import { callAws } from './aws-common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
     apiVersion: "2012-08-10",

@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 import { AWSError } from 'aws-sdk/lib/error';
-import * as Utils from './common-utils';
+import * as Utils from '../utilities/common-utils';
 import { callAws } from './aws-common-utils';
 
 const sqsClient: AWS.SQS = new AWS.SQS({

@@ -1,7 +1,7 @@
 
 import { workerData } from 'worker_threads';
-import { SQS } from './sqs';
-import { S3Bucket } from './s3Bucket';
+import { SQS } from './aws-services/sqs';
+import { S3Bucket } from './aws-services/s3Bucket';
 console.log(`Compilation passed successfully!`);
 const work = async () => {
 
@@ -15,7 +15,6 @@ const main = async () => {
 
   const myBucket = new S3Bucket("my-bucket-for-levon-arman");
   await myBucket.deploy();
-  await myBucket.undeploy();
   await myBucket.undeploy();
 }
 

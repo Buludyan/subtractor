@@ -1,7 +1,4 @@
 import * as AWS from 'aws-sdk';
-import { AWSError } from 'aws-sdk/lib/error';
-import * as Utils from './common-utils';
-import { callAws } from './aws-common-utils';
 
 const sqsClient: AWS.TranscribeService = new AWS.TranscribeService({
     apiVersion: "2017-10-26", 
