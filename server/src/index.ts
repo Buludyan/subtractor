@@ -1,14 +1,10 @@
-
-import { workerData } from 'worker_threads';
-import { SQS } from './aws-services/sqs';
-import { S3Bucket } from './aws-services/s3-bucket';
-import { DynamoTable } from './aws-services/dynamo-db';
-import { urlToHttpOptions } from 'url';
-import { archiveSourceCodeAndGetPath } from './utilities/common-utils'
+import {SQS} from './aws-services/sqs';
+import {S3Bucket} from './aws-services/s3-bucket';
+import {KeyValueStore} from './aws-services/dynamo-db';
+import {urlToHttpOptions} from 'url';
+import {archiveSourceCodeAndGetPath} from './utilities/common-utils';
 console.log(`Compilation passed successfully!`);
-const work = async () => {
-
-}
+const work = async () => {};
 
 const main = async () => {
   // const mySqs = new SQS("MyNewSQS1");
@@ -20,12 +16,11 @@ const main = async () => {
   // await myBucket.deploy();
   // await myBucket.undeploy();
 
-  // const myTable = new DynamoTable("my-dynamo-db-table-for-levon-arman");
-  // await myTable.deploy();
+  const myTable = new KeyValueStore('my-dynamo-db-table-for-levon-arman');
+  //await myTable.deploy();
+  await myTable.undeploy();
 
+  //await archiveSourceCodeAndGetPath();
+};
 
-  await archiveSourceCodeAndGetPath();
-}
-
-main()
-.catch(err => console.log(`Something bad happened: ${err}`)); 
+main().catch(err => console.log(`Something bad happened: ${err}`));
