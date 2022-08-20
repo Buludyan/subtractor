@@ -26,7 +26,6 @@ export class S3Bucket
                 return null;
             }
         );
-          
     }
     readonly undeploy = async () => {
         return await awsCommonUtils.callAws(

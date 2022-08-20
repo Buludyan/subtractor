@@ -37,10 +37,9 @@ export const getCurrentDateAsString = () => {
 
 
 // TODO: investigate, why this function create 2 source code zips
-export const archiveSourceCode = async () => {
-    const pathToSourceCode = `${__dirname}/../../..`;
-    const pathToZipFile = `${pathToSourceCode}/codebases`;
-    fs.mkdir(pathToZipFile, { recursive: true }, (err) => {
+export const archiveSourceCodeAndGetPath = async () => {
+    const pathToZipFile = `./codebases`;
+    fs.mkdir(`${pathToZipFile}`, { recursive: true }, (err) => {
         if (err) {
             return console.error(err);
         }
@@ -78,12 +77,12 @@ export const archiveSourceCode = async () => {
     archive.pipe(output);
 
     console.log(`Adding package.json to the zip file: ${zipName}`);
-    archive.file(`${pathToSourceCode}/package.json`, { name: 'package.json' });
-    console.log(`Adding src/node_modules to the zip file: ${zipName}`);
-    archive.directory(`${pathToSourceCode}/node_modules/`, `node_modules`);
-    console.log(`Adding src/dist to the zip file: ${zipName}`);
-    archive.directory(`${pathToSourceCode}/dist/`, `dist`);
+    archive.file(`package.json`, { name: 'package.json' });
+    console.log(`Adding node_modules to the zip file: ${zipName}`);
+    archive.directory(`node_modules/`, `node_modules`);
+    console.log(`Adding dist to the zip file: ${zipName}`);
+    archive.directory(`dist/`, `dist`);
     await archive.finalize();
     console.log(`Zip file ${zipName} created`);
-
+    return `${pathToZipFile}/${zipName}`;
 }

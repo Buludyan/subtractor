@@ -2,8 +2,9 @@
 import { workerData } from 'worker_threads';
 import { SQS } from './aws-services/sqs';
 import { S3Bucket } from './aws-services/s3-bucket';
+import { DynamoTable } from './aws-services/dynamo-db';
 import { urlToHttpOptions } from 'url';
-import { archiveSourceCode } from './utilities/common-utils'
+import { archiveSourceCodeAndGetPath } from './utilities/common-utils'
 console.log(`Compilation passed successfully!`);
 const work = async () => {
 
@@ -18,8 +19,12 @@ const main = async () => {
   // const myBucket = new S3Bucket("my-bucket-for-levon-arman");
   // await myBucket.deploy();
   // await myBucket.undeploy();
-  
-  await archiveSourceCode();
+
+  // const myTable = new DynamoTable("my-dynamo-db-table-for-levon-arman");
+  // await myTable.deploy();
+
+
+  await archiveSourceCodeAndGetPath();
 }
 
 main()

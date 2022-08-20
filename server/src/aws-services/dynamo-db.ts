@@ -17,11 +17,15 @@ export class DynamoTable<RecordType>
         // TODO: implement, delete table here
         throw new Error(`Not implemented`);
     }
-    readonly addRecord = async (hashKey: string, record: RecordType) : Promise<void> => {
+    readonly putRecord = async (hashKey: string, record: RecordType) : Promise<void> => {
         // TODO: implement, create table here
         throw new Error(`Not implemented`);
     }
     readonly getRecord = async (hashKey: string) : Promise<RecordType> => {
+        // TODO: implement, create table here
+        throw new Error(`Not implemented`);
+    }
+    readonly deleteRecord = async (hashKey: string) : Promise<RecordType> => {
         // TODO: implement, create table here
         throw new Error(`Not implemented`);
     }
