@@ -7,7 +7,7 @@ const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   region: 'us-east-1',
 });
 
-export class KeyValueStore<RecordType> {
+export class KeyValueStore<RecordType extends {hashKey: string}> {
   constructor(private tableName: string) {}
 
   readonly deploy = async (): Promise<void> => {

@@ -3,6 +3,8 @@ import {S3Bucket} from './aws-services/s3-bucket';
 import {KeyValueStore} from './aws-services/dynamo-db';
 import {urlToHttpOptions} from 'url';
 import {archiveSourceCodeAndGetPath} from './utilities/common-utils';
+import * as Constants from './project-specific-constants'
+
 console.log(`Compilation passed successfully!`);
 const work = async () => {};
 
@@ -16,7 +18,7 @@ const main = async () => {
   // await myBucket.deploy();
   // await myBucket.undeploy();
 
-  const myTable = new KeyValueStore('my-dynamo-db-table-for-levon-arman');
+  const myTable = new KeyValueStore(Constants.tableName);
   //await myTable.deploy();
   await myTable.undeploy();
 
