@@ -1,6 +1,12 @@
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
-import {callAws} from './aws-common-utils';
+import {awsCommand} from './aws-common-utils';
+import {
+  IGuard,
+  checkTypeGuard,
+  guardedConvertTo,
+  TypeGuardOf,
+} from '../utilities/common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
@@ -13,11 +19,14 @@ const dynamoDocClient: AWS.DynamoDB.DocumentClient =
     region: 'us-east-1',
   });
 
-export class KeyValueStore<RecordType> {
-  constructor(private tableName: string) {}
+export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
+  constructor(
+    private tableName: string,
+    private typeGuard: TypeGuardOf<RecordType>
+  ) {}
 
-  readonly deploy = async (): Promise<void> => {
-    return await callAws(
+  readonly construct = async (): Promise<void> => {
+    return await awsCommand(
       async (): Promise<void> => {
         const createTableReq: AWS.DynamoDB.Types.CreateTableInput = {
           AttributeDefinitions: [
@@ -53,8 +62,8 @@ export class KeyValueStore<RecordType> {
       }
     );
   };
-  readonly undeploy = async (): Promise<void> => {
-    return await callAws(
+  readonly destroy = async (): Promise<void> => {
+    return await awsCommand(
       async (): Promise<void> => {
         const deleteTableReq: AWS.DynamoDB.Types.DeleteTableInput = {
           TableName: this.tableName,
@@ -76,7 +85,7 @@ export class KeyValueStore<RecordType> {
     hashKey: string,
     record: RecordType
   ): Promise<void> => {
-    return await callAws(
+    return await awsCommand(
       async (): Promise<void> => {
         const putItemInput: AWS.DynamoDB.DocumentClient.PutItemInput = {
           Item: {
@@ -100,7 +109,7 @@ export class KeyValueStore<RecordType> {
     );
   };
   readonly getRecord = async (hashKey: string): Promise<RecordType> => {
-    return await callAws(
+    return await awsCommand(
       async (): Promise<RecordType> => {
         const getItemInput: AWS.DynamoDB.DocumentClient.GetItemInput = {
           Key: {
@@ -111,9 +120,8 @@ export class KeyValueStore<RecordType> {
 
         const response = await dynamoDocClient.get(getItemInput).promise();
         console.log(`Successfully get ${response.Item}`);
-
-        //TODO: make type guard
-        return response.Item as RecordType;
+        guardedConvertTo<RecordType>(response.Item, this.typeGuard);
+        return response.Item;
       },
       async (err: AWSError): Promise<RecordType | null> => {
         return null;
@@ -121,7 +129,7 @@ export class KeyValueStore<RecordType> {
     );
   };
   readonly deleteRecord = async (hashKey: string): Promise<void> => {
-    return await callAws(
+    return await awsCommand(
       async (): Promise<void> => {
         const deleteItemInput: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
           Key: {
@@ -143,7 +151,7 @@ export class KeyValueStore<RecordType> {
       }
     );
   };
-  readonly purge = async (): Promise<void> => {
+  readonly cleanup = async (): Promise<void> => {
     // TODO: implement, create table here
     throw new Error(`Not implemented`);
   };

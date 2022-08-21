@@ -1,8 +1,14 @@
 import archiver = require('archiver');
+import {Type} from 'aws-sdk/clients/cloudformation';
 import * as fs from 'fs';
+
+export interface IGuard<TypeGuard> {
+  _guard: TypeGuard;
+}
 
 export type NotNull<T> = T extends null ? never : T;
 export type NotUndefined<T> = T extends undefined ? never : T;
+export type TypeGuarded<T, TypeGuard> = T extends IGuard<TypeGuard> ? T : never;
 export type NotNullNotUndefined<T> = NonNullable<T>;
 
 export const isUndefined = (x: unknown): x is undefined => {
@@ -13,22 +19,44 @@ export const isNull = (x: unknown): x is null => {
   return x === null;
 };
 
-export const throwIfNull = <T>(
+export function throwIfNull<T>(
   x: T,
-  message: string
-): asserts x is NotNull<T> => {
+  message: string = ''
+): asserts x is NotNull<T> {
   if (isNull(x)) {
     throw new Error(message);
   }
-};
-export const throwIfUndefined = <T>(
+}
+export function throwIfUndefined<T>(
   x: T,
-  message: string
-): asserts x is NotUndefined<T> => {
+  message: string = ''
+): asserts x is NotUndefined<T> {
   if (isUndefined(x)) {
     throw new Error(message);
   }
-};
+}
+
+export function checkTypeGuard<T, TypeGuard extends string>(
+  x: unknown,
+  typeGuard: TypeGuard
+): asserts x is T {
+  if ((x as IGuard<TypeGuard>)._guard !== typeGuard) {
+    throw new Error(`TypeGuard check failed`);
+  }
+}
+
+export type TypeGuardOf<T> = T extends IGuard<infer TypeGuard extends string>
+  ? TypeGuard
+  : never;
+
+export function guardedConvertTo<T>(
+  x: unknown,
+  typeGuard: TypeGuardOf<T>
+): asserts x is T {
+  if ((x as IGuard<TypeGuardOf<T>>)._guard !== typeGuard) {
+    throw new Error(`TypeGuard check failed`);
+  }
+}
 
 export const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));

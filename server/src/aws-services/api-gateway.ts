@@ -8,11 +8,11 @@ const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
 export class ApiGate {
   constructor() {}
 
-  readonly deploy = async (): Promise<void> => {
+  readonly construct = async (): Promise<void> => {
     // TODO: implement, create table here
     throw new Error(`Not implemented`);
   };
-  readonly undeploy = async (): Promise<void> => {
+  readonly destroy = async (): Promise<void> => {
     // TODO: implement, delete table here
     throw new Error(`Not implemented`);
   };

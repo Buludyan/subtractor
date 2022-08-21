@@ -1,2 +1,1 @@
-
-export const tableName = "myTableName";
+export const hashTovideoDynamoTableName = 'hashTovideoDynamoTableName';

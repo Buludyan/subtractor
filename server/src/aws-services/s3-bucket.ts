@@ -10,8 +10,8 @@ const s3Client: AWS.S3 = new AWS.S3({
 export class S3Bucket {
   constructor(private bucketName: string) {}
 
-  readonly deploy = async () => {
-    return await awsCommonUtils.callAws(
+  readonly construct = async () => {
+    return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
         await s3Client.createBucket({Bucket: this.bucketName}).promise();
@@ -28,8 +28,8 @@ export class S3Bucket {
       }
     );
   };
-  readonly undeploy = async () => {
-    return await awsCommonUtils.callAws(
+  readonly destroy = async () => {
+    return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
         await s3Client.deleteBucket({Bucket: this.bucketName}).promise();
@@ -50,7 +50,7 @@ export class S3Bucket {
     fileName: string,
     fileContent: string
   ): Promise<void> => {
-    return await awsCommonUtils.callAws(
+    return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
         const putObjectReq: AWS.S3.PutObjectRequest = {
@@ -67,7 +67,7 @@ export class S3Bucket {
     );
   };
   readonly getFile = async (fileName: string): Promise<string | null> => {
-    return await awsCommonUtils.callAws(
+    return await awsCommonUtils.awsCommand(
       async (): Promise<string> => {
         // TODO: check other parameters
         const getObjectReq: AWS.S3.GetObjectRequest = {
@@ -75,6 +75,7 @@ export class S3Bucket {
           Key: fileName,
         };
         const response = await s3Client.getObject(getObjectReq).promise();
+        // TODO: refine this
         return response.Body as string;
       },
       async (err: AWSError): Promise<string | null> => {

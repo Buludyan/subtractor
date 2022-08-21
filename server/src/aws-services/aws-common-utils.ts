@@ -2,58 +2,47 @@ import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
 
 export const isAwsError = (err: unknown): err is AWSError => {
-  // eslint-disable-next-line
   return (
     !Utils.isUndefined((err as AWSError).code) &&
     !Utils.isUndefined((err as AWSError).message)
   );
 };
 
-export const callAws = async <ResultType>(
-  toDo: () => Promise<ResultType>,
-  errorHandler: (err: AWSError) => Promise<ResultType | null>
+export const awsCommand = async <ResultType>(
+  work: () => Promise<ResultType>,
+  errorProcessor: (err: AWSError) => Promise<ResultType | null>
 ): Promise<ResultType> => {
-  // 1 minute is more than enough because usually retryDelay is 15-30 msecs
-  const maximalTimeToWaitInMillis = 60 * 1000;
-
   const start = new Date().getMilliseconds();
-  const checkTimeLimit = () => {
+  const checkLimitsOfTime = () => {
+    const maximalWaitingTimeInMillis = 60 * 1000;
     const now = new Date().getMilliseconds();
     const duration = now - start;
-    if (duration >= maximalTimeToWaitInMillis) {
+    if (duration >= maximalWaitingTimeInMillis) {
       throw Error(
-        `Time limit exceeded (${maximalTimeToWaitInMillis} msecs) for AWS function call. Error is NOT an AWS error.`
+        `[NOT AWS] Time limit exceeded (${maximalWaitingTimeInMillis} msecs) for awsCommand function call.`
       );
     }
   };
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
-    checkTimeLimit();
+    checkLimitsOfTime();
 
     try {
-      return await toDo();
+      return await work();
     } catch (err) {
       if (!isAwsError(err)) {
-        throw Error(
-          `Error occurred while invoking AWS function. Error is NOT an AWS error. err = ${err}`
-        );
+        throw Error(`[NOT AWS] Error occurred in awsCommand, err=${err}`);
       }
       if (err.retryable) {
-        // TODO: consider random delay addition
-        const retryDelay = err.retryDelay ?? 0;
-        await Utils.sleep(retryDelay);
-      } else {
-        const errorHandlerResult = await errorHandler(err);
-        if (!Utils.isNull(errorHandlerResult)) {
-          return errorHandlerResult;
-        } else {
-          // do not rethrowing AWSError, because it does not contain any valuable for us data
-          throw Error(
-            `Error occurred while invoking AWS function. Error is an AWS error. err = ${err}`
-          );
-        }
+        await Utils.sleep(err.retryDelay ?? 0);
+        continue;
       }
+      // not retryable
+      const errorHandlerResult = await errorProcessor(err);
+      if (!Utils.isNull(errorHandlerResult)) {
+        return errorHandlerResult;
+      }
+      throw Error(`[AWS] Error occurred in awsCommand, err = ${err}`);
     }
   }
 };

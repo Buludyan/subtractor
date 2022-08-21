@@ -5,13 +5,13 @@ const sqsClient: AWS.TranscribeService = new AWS.TranscribeService({
   region: 'us-east-1',
 });
 
-export class SQS {
+export class Transcribe {
   constructor() {}
-  readonly deploy = async (): Promise<void> => {
+  readonly construct = async (): Promise<void> => {
     // TODO: implement
     throw new Error(`Not implemented`);
   };
-  readonly undeploy = async (): Promise<void> => {
+  readonly destroy = async (): Promise<void> => {
     // TODO: implement
     throw new Error(`Not implemented`);
   };

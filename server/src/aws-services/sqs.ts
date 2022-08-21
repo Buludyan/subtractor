@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
-import {callAws} from './aws-common-utils';
+import {awsCommand} from './aws-common-utils';
 
 const sqsClient: AWS.SQS = new AWS.SQS({
   apiVersion: '2012-11-05',
@@ -11,8 +11,8 @@ const sqsClient: AWS.SQS = new AWS.SQS({
 export class SQS {
   private queueUrl: string | null = null;
   constructor(private queueName: string) {}
-  readonly deploy = async () => {
-    return await callAws(
+  readonly construct = async () => {
+    return await awsCommand(
       async (): Promise<void> => {
         const createParams: AWS.SQS.Types.CreateQueueRequest = {
           QueueName: this.queueName,
@@ -34,8 +34,8 @@ export class SQS {
       }
     );
   };
-  readonly undeploy = async () => {
-    return await callAws(
+  readonly destroy = async () => {
+    return await awsCommand(
       async (): Promise<void> => {
         if (Utils.isNull(this.queueUrl)) {
           return;
@@ -54,7 +54,7 @@ export class SQS {
     );
   };
   static readonly list = async () => {
-    return await callAws(
+    return await awsCommand(
       async (): Promise<void> => {
         const createParams: AWS.SQS.Types.ListQueuesRequest = {};
 
