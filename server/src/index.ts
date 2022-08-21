@@ -20,7 +20,8 @@ const main = async () => {
 
   const myTable = new KeyValueStore(Constants.tableName);
   //await myTable.deploy();
-  await myTable.undeploy();
+  await myTable.putRecord('12345', {videoName: 'name'});
+  //await myTable.undeploy();
 
   //await archiveSourceCodeAndGetPath();
 };

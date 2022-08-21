@@ -7,7 +7,13 @@ const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   region: 'us-east-1',
 });
 
-export class KeyValueStore<RecordType extends {hashKey: string}> {
+const dynamoDocClient: AWS.DynamoDB.DocumentClient =
+  new AWS.DynamoDB.DocumentClient({
+    apiVersion: '2012-08-10',
+    region: 'us-east-1',
+  });
+
+export class KeyValueStore<RecordType> {
   constructor(private tableName: string) {}
 
   readonly deploy = async (): Promise<void> => {
@@ -70,16 +76,72 @@ export class KeyValueStore<RecordType extends {hashKey: string}> {
     hashKey: string,
     record: RecordType
   ): Promise<void> => {
-    // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+    return await callAws(
+      async (): Promise<void> => {
+        const putItemInput: AWS.DynamoDB.DocumentClient.PutItemInput = {
+          Item: {
+            hashKey: hashKey,
+            record: record,
+          },
+          TableName: this.tableName,
+          ConditionExpression: 'not (attribute_exists(hashKey))',
+        };
+
+        await dynamoDocClient.put(putItemInput).promise();
+        console.log(`Item ${hashKey} is inserted`);
+      },
+      async (err: AWSError): Promise<void | null> => {
+        if (err.code === 'ConditionalCheckFailedException') {
+          console.log(`Item ${hashKey} is already existed`);
+          return;
+        }
+        return null;
+      }
+    );
   };
   readonly getRecord = async (hashKey: string): Promise<RecordType> => {
-    // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+    return await callAws(
+      async (): Promise<RecordType> => {
+        const getItemInput: AWS.DynamoDB.DocumentClient.GetItemInput = {
+          Key: {
+            hashKey: hashKey,
+          },
+          TableName: this.tableName,
+        };
+
+        const response = await dynamoDocClient.get(getItemInput).promise();
+        console.log(`Successfully get ${response.Item}`);
+
+        //TODO: make type guard
+        return response.Item as RecordType;
+      },
+      async (err: AWSError): Promise<RecordType | null> => {
+        return null;
+      }
+    );
   };
-  readonly deleteRecord = async (hashKey: string): Promise<RecordType> => {
-    // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+  readonly deleteRecord = async (hashKey: string): Promise<void> => {
+    return await callAws(
+      async (): Promise<void> => {
+        const deleteItemInput: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
+          Key: {
+            hashKey: hashKey,
+          },
+          TableName: this.tableName,
+          ConditionExpression: 'attribute_exists(hashKey)',
+        };
+
+        await dynamoDocClient.delete(deleteItemInput).promise();
+        console.log(`Item ${hashKey} was successfully deleted`);
+      },
+      async (err: AWSError): Promise<void | null> => {
+        if (err.code === 'ResourceNotFoundException') {
+          console.log(`Item ${hashKey} not found`);
+          return;
+        }
+        return null;
+      }
+    );
   };
   readonly purge = async (): Promise<void> => {
     // TODO: implement, create table here
