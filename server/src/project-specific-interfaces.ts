@@ -1,7 +1,7 @@
 import {IGuard} from './utilities/common-utils';
 
-const hashToVideoNameTypeGuard: `hashToVideoNameTypeGuard` = `hashToVideoNameTypeGuard`;
+export const videoNameTypeGuard: `hashToVideoNameTypeGuard` = `hashToVideoNameTypeGuard`;
 
-interface IVideoName extends IGuard<typeof hashToVideoNameTypeGuard> {
+export interface IVideoName extends IGuard<typeof videoNameTypeGuard> {
   videoName: string;
 }
