@@ -61,10 +61,6 @@ export class S3Bucket {
         await s3Client.putObject(putObjectReq).promise();
       },
       async (err: AWSError): Promise<void | null> => {
-        if (err.code === 'NoSuchBucket') {
-          console.log(`Bucket ${this.bucketName} does not exist`);
-          return;
-        }
         console.log('Error', err);
         return null;
       }
