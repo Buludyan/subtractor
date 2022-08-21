@@ -100,12 +100,48 @@ export class KeyValueStore<RecordType> {
     );
   };
   readonly getRecord = async (hashKey: string): Promise<RecordType> => {
-    // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+    return await callAws(
+      async (): Promise<RecordType> => {
+        const getItemInput: AWS.DynamoDB.DocumentClient.GetItemInput = {
+          Key: {
+            hashKey: hashKey,
+          },
+          TableName: this.tableName,
+        };
+
+        const response = await dynamoDocClient.get(getItemInput).promise();
+        console.log(`Successfully get ${response.Item}`);
+
+        //TODO: make type guard
+        return response.Item as RecordType;
+      },
+      async (err: AWSError): Promise<RecordType | null> => {
+        return null;
+      }
+    );
   };
-  readonly deleteRecord = async (hashKey: string): Promise<RecordType> => {
-    // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+  readonly deleteRecord = async (hashKey: string): Promise<void> => {
+    return await callAws(
+      async (): Promise<void> => {
+        const deleteItemInput: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
+          Key: {
+            hashKey: hashKey,
+          },
+          TableName: this.tableName,
+          ConditionExpression: 'attribute_exists(hashKey)',
+        };
+
+        await dynamoDocClient.delete(deleteItemInput).promise();
+        console.log(`Item ${hashKey} was successfully deleted`);
+      },
+      async (err: AWSError): Promise<void | null> => {
+        if (err.code === 'ResourceNotFoundException') {
+          console.log(`Item ${hashKey} not found`);
+          return;
+        }
+        return null;
+      }
+    );
   };
   readonly purge = async (): Promise<void> => {
     // TODO: implement, create table here
