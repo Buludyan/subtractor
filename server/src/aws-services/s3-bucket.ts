@@ -50,11 +50,41 @@ export class S3Bucket {
     fileName: string,
     fileContent: string
   ): Promise<void> => {
-    // TODO: implement
-    throw new Error(`Not implemented`);
+    return await awsCommonUtils.callAws(
+      async (): Promise<void> => {
+        // TODO: check other parameters
+        const putObjectReq: AWS.S3.PutObjectRequest = {
+          Bucket: this.bucketName,
+          Key: fileName,
+          Body: fileContent,
+        };
+        await s3Client.putObject(putObjectReq).promise();
+      },
+      async (err: AWSError): Promise<void | null> => {
+        if (err.code === 'NoSuchBucket') {
+          console.log(`Bucket ${this.bucketName} does not exist`);
+          return;
+        }
+        console.log('Error', err);
+        return null;
+      }
+    );
   };
   readonly getFile = async (fileName: string): Promise<string | null> => {
-    // TODO: implement
-    throw new Error(`Not implemented`);
+    return await awsCommonUtils.callAws(
+      async (): Promise<string> => {
+        // TODO: check other parameters
+        const getObjectReq: AWS.S3.GetObjectRequest = {
+          Bucket: this.bucketName,
+          Key: fileName,
+        };
+        const response = await s3Client.getObject(getObjectReq).promise();
+        return response.Body as string;
+      },
+      async (err: AWSError): Promise<string | null> => {
+        console.log('Error', err);
+        return null;
+      }
+    );
   };
 }
