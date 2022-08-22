@@ -8,12 +8,34 @@ import {
   makeSureThatXIs,
   IGuard,
   throwIfUndefined,
+  sleep,
 } from './utilities/common-utils';
 import {IVideoName, videoNameTypeGuard} from './project-specific-interfaces';
 import {ApiGate} from './aws-services/api-gateway';
 
 console.log(`Compilation passed successfully!`);
-const work = async () => {};
+const apiGatewayTest = async () => {
+  const apiGate = new ApiGate('testApi2');
+  await apiGate.construct();
+  const levon = await apiGate.createResource('levon');
+  const arman = await apiGate.createResource('arman');
+  const rubicock = await apiGate.createResource('rubicock');
+  console.log(levon.id);
+  console.log(arman.id);
+  console.log(rubicock.id);
+  await sleep(10000);
+  console.log('after 10000');
+  await apiGate.deleteResource(rubicock);
+  await sleep(5000);
+  console.log('after 5000');
+  await apiGate.deleteResource(levon);
+  await sleep(5000);
+  console.log('after 5000');
+  await apiGate.deleteResource(arman);
+  await sleep(5000);
+  console.log('after 5000');
+  await apiGate.destroy();
+};
 
 const main = async () => {
   // const mySqs = new SQS("MyNewSQS1");
@@ -28,22 +50,11 @@ const main = async () => {
   // await myTable.putRecord('12345', {videoName: 'name'});
   // await myTable.destroy();
   // await archiveSourceCodeAndGetPath();
-  const myTable = new KeyValueStore<IVideoName>(
-    Constants.hashTovideoDynamoTableName,
-    videoNameTypeGuard
-  );
-  const a: any = {
-    _guard: videoNameTypeGuard,
-    videoName: videoNameTypeGuard,
-    asdad: 1123,
-  };
-  makeSureThatXIs<IVideoName>(a, videoNameTypeGuard);
-  a;
-
-  const apiGate = new ApiGate('testApi');
-
-  //apiGate.construct();
-  apiGate.destroy('jeikdv0gh7');
+  // const myTable = new KeyValueStore<IVideoName>(
+  //   Constants.hashTovideoDynamoTableName,
+  //   videoNameTypeGuard
+  // );
+  //apiGate.destroy();
   //apiGate.createResource('wsb7vdela0', '/', '/');
 };
 

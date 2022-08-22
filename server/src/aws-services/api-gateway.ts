@@ -1,4 +1,11 @@
 import * as AWS from 'aws-sdk';
+import {ResourceGroups} from 'aws-sdk';
+import {
+  isNotNull,
+  isNull,
+  isUndefined,
+  throwIfUndefined,
+} from '../utilities/common-utils';
 import {awsCommand} from './aws-common-utils';
 
 const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
@@ -6,17 +13,95 @@ const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
   region: 'eu-central-1',
 });
 
+interface Resource {
+  id: string;
+  parentId: string | null;
+  path: string | null;
+  restApiId: string;
+}
+
 export class ApiGate {
+  id: string | null = null;
   constructor(private apiName: string) {}
+
+  readonly getId = async (): Promise<string | null> => {
+    return await awsCommand(
+      async (): Promise<string | null> => {
+        const getRestAPIsReq: AWS.APIGateway.GetRestApisRequest = {};
+        const data = await apiGatewayClient
+          .getRestApis(getRestAPIsReq)
+          .promise();
+        throwIfUndefined(data.items);
+        const restApi = data.items.find(e => e.name === this.apiName);
+        if (isUndefined(restApi)) {
+          return null;
+        }
+        throwIfUndefined(restApi.id);
+        console.log(`Api ${this.apiName} ID is retrieved`);
+        return restApi.id;
+      },
+      async (): Promise<string | null> => {
+        return null;
+      }
+    );
+  };
+
+  readonly getResources = async (): Promise<Resource[]> => {
+    return await awsCommand(
+      async (): Promise<Resource[]> => {
+        if (isNull(this.id)) {
+          const id = await this.getId();
+          if (isNull(id)) {
+            throw new Error(`There is no restApi with name ${this.apiName}`);
+          }
+          this.id = id;
+        }
+        const getResourcesReq: AWS.APIGateway.GetResourcesRequest = {
+          restApiId: this.id,
+        };
+        const data = await apiGatewayClient
+          .getResources(getResourcesReq)
+          .promise();
+        throwIfUndefined(data.items);
+        const restApiId = this.id;
+        return data.items.map((e): Resource => {
+          throwIfUndefined(e.id);
+          return {
+            id: e.id,
+            parentId: e.parentId ?? null,
+            path: e.path ?? null,
+            restApiId: restApiId,
+          };
+        });
+      },
+      async (): Promise<Resource[] | null> => {
+        return null;
+      }
+    );
+  };
+
+  readonly getRootResourceId = async (): Promise<string> => {
+    const resources = await this.getResources();
+    const rootResource = resources.find(e => e.path === '/');
+    throwIfUndefined(rootResource);
+    return rootResource.id;
+  };
 
   readonly construct = async (): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
+        if (isNotNull(this.id)) {
+          return;
+        }
+
         const createRestAPIReq: AWS.APIGateway.CreateRestApiRequest = {
           name: this.apiName,
         };
-
-        await apiGatewayClient.createRestApi(createRestAPIReq).promise();
+        const data = await apiGatewayClient
+          .createRestApi(createRestAPIReq)
+          .promise();
+        throwIfUndefined(data.id);
+        this.id = data.id;
         console.log(`Api ${this.apiName} is created`);
       },
       async (): Promise<void | null> => {
@@ -24,59 +109,84 @@ export class ApiGate {
       }
     );
   };
-  readonly destroy = async (restApiId: string): Promise<void> => {
+  readonly destroy = async (): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
+        if (isNull(this.id)) {
+          const id = await this.getId();
+          if (isNull(id)) {
+            console.log(`There is no restApi with name ${this.apiName}`);
+            return;
+          }
+          this.id = id;
+        }
+
         const deleteRestAPIReq: AWS.APIGateway.DeleteRestApiRequest = {
-          restApiId: restApiId,
+          restApiId: this.id,
         };
 
         await apiGatewayClient.deleteRestApi(deleteRestAPIReq).promise();
-        console.log(`Api ${this.apiName} was deleted`);
+        this.id = null;
+        console.log(`Api ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
       }
     );
   };
-  readonly createResource = async (
-    restApiId: string,
-    parentId: string,
-    pathPart: string
-  ): Promise<void> => {
+
+  readonly createResource = async (resourceName: string): Promise<Resource> => {
     return await awsCommand(
-      async (): Promise<void> => {
+      async (): Promise<Resource> => {
+        if (isNull(this.id)) {
+          const id = await this.getId();
+          if (isNull(id)) {
+            throw new Error(`There is no restApi with name ${this.apiName}`);
+          }
+          this.id = id;
+        }
+
         const createResourceReq: AWS.APIGateway.CreateResourceRequest = {
-          restApiId: restApiId,
-          parentId: parentId,
-          pathPart: pathPart,
+          restApiId: this.id,
+          parentId: await this.getRootResourceId(),
+          pathPart: resourceName,
         };
 
-        await apiGatewayClient.createResource(createResourceReq).promise();
+        const data = await apiGatewayClient
+          .createResource(createResourceReq)
+          .promise();
         console.log(`Resource for ${this.apiName} is created`);
+        throwIfUndefined(data.id);
+        return {
+          id: data.id,
+          parentId: data.parentId ?? null,
+          path: data.path ?? null,
+          restApiId: this.id,
+        };
       },
-      async (): Promise<void | null> => {
+      async (): Promise<Resource | null> => {
         return null;
       }
     );
   };
-  readonly deleteResource = async (
-    restApiId: string,
-    resourceId: string
-  ): Promise<void> => {
+  readonly deleteResource = async (resource: Resource): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
         const deleteResourceReq: AWS.APIGateway.DeleteResourceRequest = {
-          restApiId: restApiId,
-          resourceId: resourceId,
+          restApiId: resource.restApiId,
+          resourceId: resource.id,
         };
 
         await apiGatewayClient.deleteResource(deleteResourceReq).promise();
-        console.log(`Resource for ${this.apiName} was deleted`);
+        console.log(`Resource for ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
       }
     );
+  };
+
+  static readonly destroyAll = async (): Promise<void> => {
+    // TODO: implement
   };
 }

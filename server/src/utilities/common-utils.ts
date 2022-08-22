@@ -19,6 +19,10 @@ export const isNull = (x: unknown): x is null => {
   return x === null;
 };
 
+export const isNotNull = (x: unknown): x is null => {
+  return !isNull(x);
+};
+
 export function throwIfNull<T>(x: T, message = ''): asserts x is NotNull<T> {
   if (isNull(x)) {
     throw new Error(message);
