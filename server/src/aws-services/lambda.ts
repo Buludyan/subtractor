@@ -1,11 +1,6 @@
 import * as AWS from 'aws-sdk';
 import {awsCommand} from './aws-common-utils';
-import {
-  IGuard,
-  checkTypeGuard,
-  guardedConvertTo,
-  TypeGuardOf,
-} from '../utilities/common-utils';
+import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
 
 const lambdaClient: AWS.Lambda = new AWS.Lambda({
   apiVersion: '2015-03-31',

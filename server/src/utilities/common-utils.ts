@@ -36,20 +36,11 @@ export function throwIfUndefined<T>(
   }
 }
 
-export function checkTypeGuard<T, TypeGuard extends string>(
-  x: unknown,
-  typeGuard: TypeGuard
-): asserts x is T {
-  if ((x as IGuard<TypeGuard>)._guard !== typeGuard) {
-    throw new Error(`TypeGuard check failed`);
-  }
-}
-
 export type TypeGuardOf<T> = T extends IGuard<infer TypeGuard extends string>
   ? TypeGuard
   : never;
 
-export function guardedConvertTo<T>(
+export function makeSureThatXIs<T>(
   x: unknown,
   typeGuard: TypeGuardOf<T>
 ): asserts x is T {

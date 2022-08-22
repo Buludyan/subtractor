@@ -1,12 +1,7 @@
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
 import {awsCommand} from './aws-common-utils';
-import {
-  IGuard,
-  checkTypeGuard,
-  guardedConvertTo,
-  TypeGuardOf,
-} from '../utilities/common-utils';
+import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
@@ -120,7 +115,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
 
         const response = await dynamoDocClient.get(getItemInput).promise();
         console.log(`Successfully get ${response.Item}`);
-        guardedConvertTo<RecordType>(response.Item, this.typeGuard);
+        makeSureThatXIs<RecordType>(response.Item, this.typeGuard);
         return response.Item;
       },
       async (err: AWSError): Promise<RecordType | null> => {
