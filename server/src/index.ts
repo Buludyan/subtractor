@@ -55,7 +55,6 @@ const main = async () => {
   //   videoNameTypeGuard
   // );
   //apiGate.destroy();
-  //apiGate.createResource('wsb7vdela0', '/', '/');
 };
 
 main().catch(err => console.log(`Something bad happened: ${err}`));
