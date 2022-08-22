@@ -4,7 +4,7 @@ import * as awsCommonUtils from './aws-common-utils';
 
 const s3Client: AWS.S3 = new AWS.S3({
   apiVersion: '2006-03-01',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 export class S3Bucket {

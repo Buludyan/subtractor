@@ -5,7 +5,7 @@ import {awsCommand} from './aws-common-utils';
 
 const sqsClient: AWS.SQS = new AWS.SQS({
   apiVersion: '2012-11-05',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 export class SQS {

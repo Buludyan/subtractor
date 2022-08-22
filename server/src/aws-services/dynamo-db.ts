@@ -5,13 +5,13 @@ import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 const dynamoDocClient: AWS.DynamoDB.DocumentClient =
   new AWS.DynamoDB.DocumentClient({
     apiVersion: '2012-08-10',
-    region: 'us-east-1',
+    region: 'eu-central-1',
   });
 
 export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {

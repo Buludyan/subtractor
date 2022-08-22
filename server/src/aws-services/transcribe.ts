@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 
 const sqsClient: AWS.TranscribeService = new AWS.TranscribeService({
   apiVersion: '2017-10-26',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 export class Transcribe {

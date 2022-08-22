@@ -4,7 +4,7 @@ import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
 
 const lambdaClient: AWS.Lambda = new AWS.Lambda({
   apiVersion: '2015-03-31',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 export class Lambda {
