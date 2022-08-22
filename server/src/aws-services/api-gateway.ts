@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 
 const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
-  apiVersion: '2012-08-10',
+  apiVersion: '2015-07-09',
   region: 'us-east-1',
 });
 
