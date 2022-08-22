@@ -10,6 +10,7 @@ import {
   throwIfUndefined,
 } from './utilities/common-utils';
 import {IVideoName, videoNameTypeGuard} from './project-specific-interfaces';
+import {ApiGate} from './aws-services/api-gateway';
 
 console.log(`Compilation passed successfully!`);
 const work = async () => {};
@@ -38,6 +39,12 @@ const main = async () => {
   };
   makeSureThatXIs<IVideoName>(a, videoNameTypeGuard);
   a;
+
+  const apiGate = new ApiGate('testApi');
+
+  //apiGate.construct();
+  apiGate.destroy('jeikdv0gh7');
+  //apiGate.createResource('wsb7vdela0', '/', '/');
 };
 
 main().catch(err => console.log(`Something bad happened: ${err}`));

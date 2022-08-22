@@ -4,7 +4,7 @@ import * as awsCommonUtils from './aws-common-utils';
 
 const s3Client: AWS.S3 = new AWS.S3({
   apiVersion: '2006-03-01',
-  region: 'us-east-1',
+  region: 'eu-central-1',
 });
 
 export class S3Bucket {
@@ -17,7 +17,7 @@ export class S3Bucket {
         await s3Client.createBucket({Bucket: this.bucketName}).promise();
       },
       async (err: AWSError): Promise<void | null> => {
-        if (err.code === `BucketAlreadyOwnedByYou`) {
+        if (err.code === 'BucketAlreadyOwnedByYou') {
           console.log(
             `Bucket ${this.bucketName} already owned by you, skipping creation.`
           );
@@ -35,7 +35,7 @@ export class S3Bucket {
         await s3Client.deleteBucket({Bucket: this.bucketName}).promise();
       },
       async (err: AWSError): Promise<void | null> => {
-        if (err.code === `NoSuchBucket`) {
+        if (err.code === 'NoSuchBucket') {
           console.log(
             `Bucket ${this.bucketName} does not exist, nothing to delete!`
           );
