@@ -118,7 +118,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         makeSureThatXIs<RecordType>(response.Item, this.typeGuard);
         return response.Item;
       },
-      async (err: AWSError): Promise<RecordType | null> => {
+      async (): Promise<RecordType | null> => {
         return null;
       }
     );
@@ -148,6 +148,6 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
   };
   readonly cleanup = async (): Promise<void> => {
     // TODO: implement, create table here
-    throw new Error(`Not implemented`);
+    throw new Error('Not implemented');
   };
 }

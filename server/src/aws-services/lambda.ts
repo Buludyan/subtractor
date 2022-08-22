@@ -34,10 +34,10 @@ export class Lambda {
           FunctionName: this.functionName,
           Handler: this.handlerName,
           MemorySize: 128,
-          PackageType: `Zip`,
+          PackageType: 'Zip',
           Publish: true,
-          Role: `string`,
-          Runtime: `nodejs16.x`,
+          Role: 'string',
+          Runtime: 'nodejs16.x',
           // Tags: {
           //    string : string
           // },
@@ -45,7 +45,7 @@ export class Lambda {
         };
         await lambdaClient.createFunction(createFunctionRequest).promise();
       },
-      async err => {
+      async () => {
         return null;
       }
     );
@@ -58,7 +58,7 @@ export class Lambda {
         };
         await lambdaClient.deleteFunction(deleteFunctionRequest).promise();
       },
-      async err => {
+      async () => {
         return null;
       }
     );
