@@ -1,3 +1,4 @@
+import {Log} from './../utilities/log';
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
@@ -24,12 +25,14 @@ export class SQS {
         };
         const data = await sqsClient.createQueue(createParams).promise();
         await Utils.sleep(1000);
-        if (Utils.isUndefined(data.QueueUrl))
-          throw new Error(`data.QueueUrl cannot be undefined`);
+        //QUESTION
+        if (Utils.isUndefined(data.QueueUrl)) {
+          Log.error('data.QueueUrl cannot be undefined');
+          throw new Error('data.QueueUrl cannot be undefined');
+        }
         this.queueUrl = data.QueueUrl;
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
@@ -45,10 +48,9 @@ export class SQS {
         };
         const data = await sqsClient.deleteQueue(deleteParams).promise();
         await Utils.sleep(60000);
-        console.log(`Queue ${this.queueName} successfully deleted!`);
+        Log.info(`Queue ${this.queueName} successfully deleted!`);
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
@@ -60,10 +62,9 @@ export class SQS {
 
         // TODO: handle several pages of queues
         const data = await sqsClient.listQueues(createParams).promise();
-        console.log(data.QueueUrls);
+        Log.info(`${data.QueueUrls}`);
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
