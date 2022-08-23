@@ -4,14 +4,10 @@ import {KeyValueStore} from './aws-services/dynamo-db';
 import {urlToHttpOptions} from 'url';
 import * as Constants from './project-specific-constants';
 import {type} from 'os';
-import {
-  makeSureThatXIs,
-  IGuard,
-  throwIfUndefined,
-  sleep,
-} from './utilities/common-utils';
+import {sleep} from './utilities/common-utils';
 import {IVideoName, videoNameTypeGuard} from './project-specific-interfaces';
 import {ApiGate} from './aws-services/api-gateway';
+import {Log} from './utilities/log';
 
 console.log(`Compilation passed successfully!`);
 const apiGatewayTest = async () => {
@@ -37,7 +33,22 @@ const apiGatewayTest = async () => {
   await apiGate.destroy();
 };
 
+const f = () => {
+  Log.error(`${123123}`);
+};
+const g = (a: number) => {
+  Log.trace(`${a}_1`);
+  f();
+  Log.fatal(`${a}_2`);
+};
+const h = (s: string) => {
+  Log.info(`${s}_1`);
+  g(999999);
+  Log.info(`${s}_2`);
+};
+
 const main = async () => {
+  h('abcd');
   // const mySqs = new SQS("MyNewSQS1");
   // await mySqs.construct();
   // await work();
