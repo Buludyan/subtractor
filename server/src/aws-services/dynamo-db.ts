@@ -147,6 +147,26 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
       }
     );
   };
+  readonly getDyDBArn = async (): Promise<void> => {
+    return await awsCommand(
+      async (): Promise<void> => {
+        const describeTableInput: AWS.DynamoDB.DocumentClient.DescribeTableInput =
+          {
+            TableName: this.tableName,
+          };
+
+        const data = await dynamoClient
+          .describeTable(describeTableInput)
+          .promise();
+        Log.info(
+          `${this.tableName} arn is ${data.Table?.RestoreSummary?.SourceTableArn}`
+        );
+      },
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
   readonly cleanup = async (): Promise<void> => {
     // TODO: implement, create table here
     throw new Error('Not implemented');

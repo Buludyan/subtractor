@@ -70,7 +70,7 @@ export const archiveSourceCodeAndGetPath = async () => {
     if (err) {
       return Log.error(err.message);
     }
-    Log.info(`Directory ${pathToZipFile} created successfully!`);
+    return Log.info(`Directory ${pathToZipFile} created successfully!`);
   });
   const zipName = `codebase-${getCurrentDateAsString()}.zip`;
   Log.info(`Creating zip file: ${pathToZipFile}/${zipName}`);

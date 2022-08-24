@@ -25,7 +25,7 @@ export class SQS {
         };
         const data = await sqsClient.createQueue(createParams).promise();
         await Utils.sleep(1000);
-        //QUESTION
+        //Throw
         if (Utils.isUndefined(data.QueueUrl)) {
           Log.error('data.QueueUrl cannot be undefined');
           throw new Error('data.QueueUrl cannot be undefined');
@@ -65,6 +65,28 @@ export class SQS {
         Log.info(`${data.QueueUrls}`);
       },
       async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+  static readonly getQueueArn = async () => {
+    return await awsCommand(
+      async (): Promise<void> => {
+        const queueAttrParams: AWS.SQS.Types.GetQueueAttributesRequest = {
+          QueueUrl: '///',
+          AttributeNames: ['QueueArn'],
+        };
+
+        const queueArn = await sqsClient
+          .getQueueAttributes(queueAttrParams)
+          .promise();
+        Log.info(`${queueArn}`);
+      },
+      async (err: AWSError): Promise<void | null> => {
+        if (err.code === 'InvalidAttributeName') {
+          Log.error('Invalid attribute name');
+          return;
+        }
         return null;
       }
     );
