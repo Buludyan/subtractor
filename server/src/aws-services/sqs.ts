@@ -68,18 +68,18 @@ export class SQS {
     );
   };
   readonly getArn = async () => {
-    const getQueueUrlReq: AWS.SQS.Types.GetQueueUrlRequest = {
-      QueueName: this.queueName,
-    };
-
-    const response = await sqsClient.getQueueUrl(getQueueUrlReq).promise();
-
-    Utils.throwIfUndefined(response.QueueUrl);
-
-    const queueUrl = response.QueueUrl;
-
     return await awsCommand(
       async (): Promise<void> => {
+        const getQueueUrlReq: AWS.SQS.Types.GetQueueUrlRequest = {
+          QueueName: this.queueName,
+        };
+
+        const response = await sqsClient.getQueueUrl(getQueueUrlReq).promise();
+
+        Utils.throwIfUndefined(response.QueueUrl);
+
+        const queueUrl = response.QueueUrl;
+
         const queueAttrParams: AWS.SQS.Types.GetQueueAttributesRequest = {
           QueueUrl: queueUrl,
           AttributeNames: ['QueueArn'],

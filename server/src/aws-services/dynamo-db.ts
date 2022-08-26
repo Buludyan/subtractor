@@ -120,7 +120,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         const response = await dynamoDocClient.get(getItemInput).promise();
-        Log.info(`Successfully get ${response.Item}`);
+        Log.info(`Successfully get ${JSON.stringify(response.Item)}`);
         makeSureThatXIs<RecordType>(response.Item, this.typeGuard);
         return response.Item;
       },
@@ -164,9 +164,10 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
           .describeTable(describeTableInput)
           .promise();
 
-        throwIfUndefined(data);
+        throwIfUndefined(data.Table);
+        throwIfUndefined(data.Table.TableArn);
 
-        Log.info(`${this.tableName} arn is ${data.Table?.TableArn}`);
+        Log.info(`${this.tableName} arn is ${data.Table.TableArn}`);
       },
       async (): Promise<void | null> => {
         return null;
