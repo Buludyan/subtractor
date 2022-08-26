@@ -49,8 +49,9 @@ export function makeSureThatXIs<T>(
   typeGuard: TypeGuardOf<T>
 ): asserts x is T {
   if ((x as IGuard<TypeGuardOf<T>>)._guard !== typeGuard) {
-    Log.error('TypeGuard check failed');
-    throw new Error('TypeGuard check failed');
+    const errorMessage = 'TypeGuard check failed';
+    Log.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 

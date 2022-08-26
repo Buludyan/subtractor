@@ -2,7 +2,12 @@ import {Log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
 import {awsCommand} from './aws-common-utils';
-import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
+import {
+  IGuard,
+  makeSureThatXIs,
+  throwIfUndefined,
+  TypeGuardOf,
+} from '../utilities/common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
@@ -147,7 +152,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
       }
     );
   };
-  readonly getDyDBArn = async (): Promise<void> => {
+  readonly getArn = async (): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
         const describeTableInput: AWS.DynamoDB.DocumentClient.DescribeTableInput =
@@ -158,9 +163,10 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         const data = await dynamoClient
           .describeTable(describeTableInput)
           .promise();
-        Log.info(
-          `${this.tableName} arn is ${data.Table?.RestoreSummary?.SourceTableArn}`
-        );
+
+        throwIfUndefined(data);
+
+        Log.info(`${this.tableName} arn is ${data.Table?.TableArn}`);
       },
       async (): Promise<void | null> => {
         return null;

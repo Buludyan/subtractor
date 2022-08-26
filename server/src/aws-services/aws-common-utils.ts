@@ -19,12 +19,9 @@ export const awsCommand = async <ResultType>(
     const now = new Date().getMilliseconds();
     const duration = now - start;
     if (duration >= maximalWaitingTimeInMillis) {
-      Log.error(
-        `[NOT AWS] Time limit exceeded (${maximalWaitingTimeInMillis} msecs) for awsCommand function call.`
-      );
-      throw Error(
-        `[NOT AWS] Time limit exceeded (${maximalWaitingTimeInMillis} msecs) for awsCommand function call.`
-      );
+      const errorMessage = `[NOT AWS] Time limit exceeded (${maximalWaitingTimeInMillis} msecs) for awsCommand function call.`;
+      Log.error(errorMessage);
+      throw Error(errorMessage);
     }
   };
 
@@ -35,8 +32,9 @@ export const awsCommand = async <ResultType>(
       return await work();
     } catch (err) {
       if (!isAwsError(err)) {
-        Log.error(`[NOT AWS] Error occurred in awsCommand, err=${err}`);
-        throw Error(`[NOT AWS] Error occurred in awsCommand, err=${err}`);
+        const errorMessage = `[NOT AWS] Error occurred in awsCommand, err=${err}`;
+        Log.error(errorMessage);
+        throw Error(errorMessage);
       }
       if (err.retryable) {
         await Utils.sleep(err.retryDelay ?? 0);
@@ -47,8 +45,9 @@ export const awsCommand = async <ResultType>(
       if (!Utils.isNull(errorHandlerResult)) {
         return errorHandlerResult;
       }
-      Log.error(`[AWS] Error occurred in awsCommand, err=${err}`);
-      throw Error(`[AWS] Error occurred in awsCommand, err = ${err}`);
+      const errorMessage = `[AWS] Error occurred in awsCommand, err=${err}`;
+      Log.error(errorMessage);
+      throw Error(errorMessage);
     }
   }
 };

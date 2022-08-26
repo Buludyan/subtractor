@@ -53,8 +53,9 @@ export class ApiGate {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            Log.error(`There is no restApi with name ${this.apiName}`);
-            throw new Error(`There is no restApi with name ${this.apiName}`);
+            const errorMessage = `There is no restApi with name ${this.apiName}`;
+            Log.error(errorMessage);
+            throw new Error(errorMessage);
           }
           this.id = id;
         }
@@ -143,8 +144,9 @@ export class ApiGate {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            Log.error(`There is no restApi with name ${this.apiName}`);
-            throw new Error(`There is no restApi with name ${this.apiName}`);
+            const errorMessage = `There is no restApi with name ${this.apiName}`;
+            Log.error(errorMessage);
+            throw new Error(errorMessage);
           }
           this.id = id;
         }

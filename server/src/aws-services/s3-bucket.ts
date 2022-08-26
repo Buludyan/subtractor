@@ -81,4 +81,7 @@ export class S3Bucket {
       }
     );
   };
+  readonly getArn = async (): Promise<string> => {
+    return `arn:aws:s3:::${this.bucketName}`;
+  };
 }
