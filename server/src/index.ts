@@ -4,7 +4,11 @@ import {KeyValueStore} from './aws-services/dynamo-db';
 import {urlToHttpOptions} from 'url';
 import * as Constants from './project-specific-constants';
 import {type} from 'os';
-import {sleep, TypeGuardOf} from './utilities/common-utils';
+import {
+  archiveSourceCodeAndGetPath,
+  sleep,
+  TypeGuardOf,
+} from './utilities/common-utils';
 import {
   IVideoName,
   videoNameTypeGuard,
@@ -12,6 +16,8 @@ import {
 } from './project-specific-interfaces';
 import {ApiGate} from './aws-services/api-gateway';
 import {Log} from './utilities/log';
+import {Lambda} from './aws-services/lambda';
+import {plusLambdaHandler} from './lambdasHandlers/simple-plus-lambda';
 
 Log.info(`Compilation passed successfully!`);
 const apiGatewayTest = async () => {
@@ -56,19 +62,26 @@ const dynamoDbExample = async () => {
   await myTable.destroy();
 };
 
-const main = async () => {
-  // const mySqs = new SQS("MyNewSQS1");
-  // await mySqs.construct();
-  // await work();
-  // await mySqs.destroy();
-  // const myBucket = new S3Bucket("my-bucket-for-levon-arman");
-  // await myBucket.construct();
-  // await myBucket.destroy();
-  // const myTable = new KeyValueStore(Constants.tableName);
-  // await myTable.construct();
-  // await myTable.putRecord('12345', {videoName: 'name'});
-  // await myTable.destroy();
-  // await archiveSourceCodeAndGetPath();
+const lambdaDeployExample = async () => {
+  const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
+  await s3Bucket.construct();
+  const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
+  await s3Bucket.sendFile(
+    lambdaZipFilePath,
+    lambdaZipFilePath,
+    'application/zip'
+  );
+  const lambda: Lambda = new Lambda(
+    `my-custom-lambda`,
+    Constants.lambdaZipFileS3BucketName,
+    lambdaZipFilePath,
+    plusLambdaHandler
+  );
+  await lambda.construct();
+  await sleep(60000);
+  await lambda.destroy();
 };
+
+const main = async () => {};
 
 main().catch(err => Log.error(`Something bad happened: ${err}`));

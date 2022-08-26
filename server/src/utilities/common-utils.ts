@@ -16,6 +16,10 @@ export const isUndefined = (x: unknown): x is undefined => {
   return x === undefined;
 };
 
+export const isNotUndefined = (x: unknown): x is undefined => {
+  return !isUndefined(x);
+};
+
 export const isNull = (x: unknown): x is null => {
   return x === null;
 };
@@ -66,7 +70,7 @@ export const getCurrentDateAsString = () => {
 
 // TODO: investigate, why this function create 2 source code zips
 export const archiveSourceCodeAndGetPath = async () => {
-  const pathToZipFile = './codebases';
+  const pathToZipFile = 'codebases';
   fs.mkdir(`${pathToZipFile}`, {recursive: true}, err => {
     if (err) {
       return Log.error(err.message);
@@ -114,6 +118,7 @@ export const archiveSourceCodeAndGetPath = async () => {
   Log.info(`Adding dist to the zip file: ${zipName}`);
   archive.directory('dist/', 'dist');
   await archive.finalize();
+  await sleep(3000);
   Log.info(`Zip file ${zipName} created`);
   return `${pathToZipFile}/${zipName}`;
 };
