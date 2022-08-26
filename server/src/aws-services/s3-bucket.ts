@@ -46,6 +46,7 @@ export class S3Bucket {
       }
     );
   };
+
   readonly sendFile = async (
     fileName: string,
     fileContent: string

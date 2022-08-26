@@ -4,8 +4,12 @@ import {KeyValueStore} from './aws-services/dynamo-db';
 import {urlToHttpOptions} from 'url';
 import * as Constants from './project-specific-constants';
 import {type} from 'os';
-import {sleep} from './utilities/common-utils';
-import {IVideoName, videoNameTypeGuard} from './project-specific-interfaces';
+import {sleep, TypeGuardOf} from './utilities/common-utils';
+import {
+  IVideoName,
+  videoNameTypeGuard,
+  newVideoName,
+} from './project-specific-interfaces';
 import {ApiGate} from './aws-services/api-gateway';
 import {Log} from './utilities/log';
 
@@ -33,22 +37,26 @@ const apiGatewayTest = async () => {
   await apiGate.destroy();
 };
 
-const f = () => {
-  Log.error(`${123123}`);
-};
-const g = (a: number) => {
-  Log.trace(`${a}_1`);
-  f();
-  Log.fatal(`${a}_2`);
-};
-const h = (s: string) => {
-  Log.info(`${s}_1`);
-  g(999999);
-  Log.info(`${s}_2`);
+const dynamoDbExample = async () => {
+  const myTable = new KeyValueStore<IVideoName>(
+    Constants.hashTovideoDynamoTableName,
+    videoNameTypeGuard
+  );
+  await myTable.construct();
+  await sleep(5000);
+  await myTable.putRecord('a', newVideoName('v1.mp4'));
+  await myTable.putRecord('b', newVideoName('v2.mp4'));
+  await myTable.putRecord('c', newVideoName('v3.mp4'));
+  await myTable.putRecord('d', newVideoName('v4.mp4'));
+  const item = await myTable.getRecord('d');
+  item.videoName = 'v5.mp4';
+  await myTable.putRecord('d*', item);
+
+  await sleep(30000);
+  await myTable.destroy();
 };
 
 const main = async () => {
-  h('abcd');
   // const mySqs = new SQS("MyNewSQS1");
   // await mySqs.construct();
   // await work();
@@ -61,11 +69,6 @@ const main = async () => {
   // await myTable.putRecord('12345', {videoName: 'name'});
   // await myTable.destroy();
   // await archiveSourceCodeAndGetPath();
-  // const myTable = new KeyValueStore<IVideoName>(
-  //   Constants.hashTovideoDynamoTableName,
-  //   videoNameTypeGuard
-  // );
-  //apiGate.destroy();
 };
 
 main().catch(err => console.log(`Something bad happened: ${err}`));
