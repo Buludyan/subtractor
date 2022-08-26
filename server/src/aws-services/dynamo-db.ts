@@ -121,8 +121,10 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
 
         const response = await dynamoDocClient.get(getItemInput).promise();
         Log.info(`Successfully get ${JSON.stringify(response.Item)}`);
-        makeSureThatXIs<RecordType>(response.Item, this.typeGuard);
-        return response.Item;
+        throwIfUndefined(response.Item);
+        const record = response.Item.record;
+        makeSureThatXIs<RecordType>(record, this.typeGuard);
+        return record;
       },
       async (): Promise<RecordType | null> => {
         return null;
