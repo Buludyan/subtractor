@@ -13,3 +13,4 @@ export class EventSourceMappingSQS {
   readonly getArn = async () => {
     return this.arn;
   };
+}
