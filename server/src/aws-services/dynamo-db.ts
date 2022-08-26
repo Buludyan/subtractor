@@ -1,7 +1,13 @@
+import {Log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
 import {awsCommand} from './aws-common-utils';
-import {IGuard, makeSureThatXIs, TypeGuardOf} from '../utilities/common-utils';
+import {
+  IGuard,
+  makeSureThatXIs,
+  throwIfUndefined,
+  TypeGuardOf,
+} from '../utilities/common-utils';
 
 const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
@@ -46,11 +52,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoClient.createTable(createTableReq).promise();
-        console.log(`Table ${this.tableName} is created`);
+        Log.info(`Table ${this.tableName} is created`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceInUseException') {
-          console.log(`Table ${this.tableName} is already created`);
+          Log.error(`Table ${this.tableName} is already created`);
           return;
         }
         return null;
@@ -65,11 +71,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoClient.deleteTable(deleteTableReq).promise();
-        console.log(`Table ${this.tableName} is deleted`);
+        Log.info(`Table ${this.tableName} is deleted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceNotFoundException') {
-          console.log(`Table ${this.tableName} is not found`);
+          Log.error(`Table ${this.tableName} is not found`);
           return;
         }
         return null;
@@ -92,11 +98,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoDocClient.put(putItemInput).promise();
-        console.log(`Item ${hashKey} is inserted`);
+        Log.info(`Item ${hashKey} is inserted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ConditionalCheckFailedException') {
-          console.log(`Item ${hashKey} is already existed`);
+          Log.error(`Item ${hashKey} is already existed`);
           return;
         }
         return null;
@@ -114,7 +120,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         const response = await dynamoDocClient.get(getItemInput).promise();
-        console.log(`Successfully get ${response.Item}`);
+        Log.info(`Successfully get ${JSON.stringify(response.Item)}`);
         makeSureThatXIs<RecordType>(response.Item, this.typeGuard);
         return response.Item;
       },
@@ -135,13 +141,35 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoDocClient.delete(deleteItemInput).promise();
-        console.log(`Item ${hashKey} was successfully deleted`);
+        Log.info(`Item ${hashKey} was successfully deleted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceNotFoundException') {
-          console.log(`Item ${hashKey} not found`);
+          Log.error(`Item ${hashKey} not found`);
           return;
         }
+        return null;
+      }
+    );
+  };
+  readonly getArn = async (): Promise<void> => {
+    return await awsCommand(
+      async (): Promise<void> => {
+        const describeTableInput: AWS.DynamoDB.DocumentClient.DescribeTableInput =
+          {
+            TableName: this.tableName,
+          };
+
+        const data = await dynamoClient
+          .describeTable(describeTableInput)
+          .promise();
+
+        throwIfUndefined(data.Table);
+        throwIfUndefined(data.Table.TableArn);
+
+        Log.info(`${this.tableName} arn is ${data.Table.TableArn}`);
+      },
+      async (): Promise<void | null> => {
         return null;
       }
     );

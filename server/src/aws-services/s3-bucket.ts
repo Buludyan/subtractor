@@ -1,3 +1,4 @@
+import {Log} from './../utilities/log';
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as awsCommonUtils from './aws-common-utils';
@@ -18,12 +19,11 @@ export class S3Bucket {
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'BucketAlreadyOwnedByYou') {
-          console.log(
+          Log.error(
             `Bucket ${this.bucketName} already owned by you, skipping creation.`
           );
           return;
         }
-        console.log('Error', err);
         return null;
       }
     );
@@ -36,12 +36,11 @@ export class S3Bucket {
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'NoSuchBucket') {
-          console.log(
+          Log.error(
             `Bucket ${this.bucketName} does not exist, nothing to delete!`
           );
           return;
         }
-        console.log('Error', err);
         return null;
       }
     );
@@ -60,8 +59,7 @@ export class S3Bucket {
         };
         await s3Client.putObject(putObjectReq).promise();
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
@@ -78,10 +76,12 @@ export class S3Bucket {
         // TODO: refine this
         return response.Body as string;
       },
-      async (err: AWSError): Promise<string | null> => {
-        console.log('Error', err);
+      async (): Promise<string | null> => {
         return null;
       }
     );
+  };
+  readonly getArn = async (): Promise<string> => {
+    return `arn:aws:s3:::${this.bucketName}`;
   };
 }

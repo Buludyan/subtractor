@@ -1,3 +1,4 @@
+import {Log} from './../utilities/log';
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
@@ -24,12 +25,12 @@ export class SQS {
         };
         const data = await sqsClient.createQueue(createParams).promise();
         await Utils.sleep(1000);
-        if (Utils.isUndefined(data.QueueUrl))
-          throw new Error(`data.QueueUrl cannot be undefined`);
+
+        Utils.throwIfUndefined(data.QueueUrl);
+
         this.queueUrl = data.QueueUrl;
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
@@ -45,10 +46,9 @@ export class SQS {
         };
         const data = await sqsClient.deleteQueue(deleteParams).promise();
         await Utils.sleep(60000);
-        console.log(`Queue ${this.queueName} successfully deleted!`);
+        Log.info(`Queue ${this.queueName} successfully deleted!`);
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
         return null;
       }
     );
@@ -60,10 +60,38 @@ export class SQS {
 
         // TODO: handle several pages of queues
         const data = await sqsClient.listQueues(createParams).promise();
-        console.log(data.QueueUrls);
+        Log.info(`${data.QueueUrls}`);
       },
-      async (err: AWSError): Promise<void | null> => {
-        console.log('Error', err);
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+  readonly getArn = async () => {
+    return await awsCommand(
+      async (): Promise<void> => {
+        const getQueueUrlReq: AWS.SQS.Types.GetQueueUrlRequest = {
+          QueueName: this.queueName,
+        };
+
+        const response = await sqsClient.getQueueUrl(getQueueUrlReq).promise();
+
+        Utils.throwIfUndefined(response.QueueUrl);
+
+        const queueUrl = response.QueueUrl;
+
+        const queueAttrParams: AWS.SQS.Types.GetQueueAttributesRequest = {
+          QueueUrl: queueUrl,
+          AttributeNames: ['QueueArn'],
+        };
+
+        const queueArn = await sqsClient
+          .getQueueAttributes(queueAttrParams)
+          .promise();
+
+        Log.info(`${queueArn}`);
+      },
+      async (): Promise<void | null> => {
         return null;
       }
     );

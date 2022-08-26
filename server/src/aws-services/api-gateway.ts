@@ -6,6 +6,7 @@ import {
   isUndefined,
   throwIfUndefined,
 } from '../utilities/common-utils';
+import {Log} from '../utilities/log';
 import {awsCommand} from './aws-common-utils';
 
 const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
@@ -37,7 +38,7 @@ export class ApiGate {
           return null;
         }
         throwIfUndefined(restApi.id);
-        console.log(`Api ${this.apiName} ID is retrieved`);
+        Log.info(`Api ${this.apiName} ID is retrieved`);
         return restApi.id;
       },
       async (): Promise<string | null> => {
@@ -52,7 +53,9 @@ export class ApiGate {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            throw new Error(`There is no restApi with name ${this.apiName}`);
+            const errorMessage = `There is no restApi with name ${this.apiName}`;
+            Log.error(errorMessage);
+            throw new Error(errorMessage);
           }
           this.id = id;
         }
@@ -102,7 +105,7 @@ export class ApiGate {
           .promise();
         throwIfUndefined(data.id);
         this.id = data.id;
-        console.log(`Api ${this.apiName} is created`);
+        Log.info(`Api ${this.apiName} is created`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -115,7 +118,7 @@ export class ApiGate {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            console.log(`There is no restApi with name ${this.apiName}`);
+            Log.info(`There is no restApi with name ${this.apiName}`);
             return;
           }
           this.id = id;
@@ -127,7 +130,7 @@ export class ApiGate {
 
         await apiGatewayClient.deleteRestApi(deleteRestAPIReq).promise();
         this.id = null;
-        console.log(`Api ${this.apiName} has deleted`);
+        Log.info(`Api ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -141,7 +144,9 @@ export class ApiGate {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            throw new Error(`There is no restApi with name ${this.apiName}`);
+            const errorMessage = `There is no restApi with name ${this.apiName}`;
+            Log.error(errorMessage);
+            throw new Error(errorMessage);
           }
           this.id = id;
         }
@@ -155,7 +160,7 @@ export class ApiGate {
         const data = await apiGatewayClient
           .createResource(createResourceReq)
           .promise();
-        console.log(`Resource for ${this.apiName} is created`);
+        Log.info(`Resource for ${this.apiName} is created`);
         throwIfUndefined(data.id);
         return {
           id: data.id,
@@ -178,7 +183,7 @@ export class ApiGate {
         };
 
         await apiGatewayClient.deleteResource(deleteResourceReq).promise();
-        console.log(`Resource for ${this.apiName} has deleted`);
+        Log.info(`Resource for ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
