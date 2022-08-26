@@ -13,27 +13,27 @@ import {
 import {ApiGate} from './aws-services/api-gateway';
 import {Log} from './utilities/log';
 
-console.log(`Compilation passed successfully!`);
+Log.info(`Compilation passed successfully!`);
 const apiGatewayTest = async () => {
   const apiGate = new ApiGate('testApi2');
   await apiGate.construct();
   const levon = await apiGate.createResource('levon');
   const arman = await apiGate.createResource('arman');
   const rubicock = await apiGate.createResource('rubicock');
-  console.log(levon.id);
-  console.log(arman.id);
-  console.log(rubicock.id);
+  Log.info(levon.id);
+  Log.info(arman.id);
+  Log.info(rubicock.id);
   await sleep(10000);
-  console.log('after 10000');
+  Log.info('after 10000');
   await apiGate.deleteResource(rubicock);
   await sleep(5000);
-  console.log('after 5000');
+  Log.info('after 5000');
   await apiGate.deleteResource(levon);
   await sleep(5000);
-  console.log('after 5000');
+  Log.info('after 5000');
   await apiGate.deleteResource(arman);
   await sleep(5000);
-  console.log('after 5000');
+  Log.info('after 5000');
   await apiGate.destroy();
 };
 
@@ -71,4 +71,4 @@ const main = async () => {
   // await archiveSourceCodeAndGetPath();
 };
 
-main().catch(err => console.log(`Something bad happened: ${err}`));
+main().catch(err => Log.error(`Something bad happened: ${err}`));

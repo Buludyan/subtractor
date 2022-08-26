@@ -9,7 +9,6 @@ export class Log {
     // TODO: take stack trace
     // process stacktrace (SourceMapping)
     // send to cloud watch
-    // console.error(<>)
   };
   static readonly info = async (message: string) => {
     _log.info(message);

@@ -1,3 +1,4 @@
+import {Log} from './log';
 import archiver = require('archiver');
 //import {Type} from 'aws-sdk/clients/cloudformation';
 import * as fs from 'fs';
@@ -25,6 +26,7 @@ export const isNotNull = (x: unknown): x is null => {
 
 export function throwIfNull<T>(x: T, message = ''): asserts x is NotNull<T> {
   if (isNull(x)) {
+    Log.error(message);
     throw new Error(message);
   }
 }
@@ -33,6 +35,7 @@ export function throwIfUndefined<T>(
   message = ''
 ): asserts x is NotUndefined<T> {
   if (isUndefined(x)) {
+    Log.error(message);
     throw new Error(message);
   }
 }
@@ -46,7 +49,9 @@ export function makeSureThatXIs<T>(
   typeGuard: TypeGuardOf<T>
 ): asserts x is T {
   if ((x as IGuard<TypeGuardOf<T>>)._guard !== typeGuard) {
-    throw new Error('TypeGuard check failed');
+    const errorMessage = 'TypeGuard check failed';
+    Log.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
@@ -64,50 +69,51 @@ export const archiveSourceCodeAndGetPath = async () => {
   const pathToZipFile = './codebases';
   fs.mkdir(`${pathToZipFile}`, {recursive: true}, err => {
     if (err) {
-      return console.error(err);
+      return Log.error(err.message);
     }
-    console.log(`Directory ${pathToZipFile} created successfully!`);
+    return Log.info(`Directory ${pathToZipFile} created successfully!`);
   });
   const zipName = `codebase-${getCurrentDateAsString()}.zip`;
-  console.log(`Creating zip file: ${pathToZipFile}/${zipName}`);
+  Log.info(`Creating zip file: ${pathToZipFile}/${zipName}`);
   const output = fs.createWriteStream(`${pathToZipFile}/${zipName}`);
   const archive = archiver('zip', {
     zlib: {level: 9}, // Sets the compression level.
   });
 
   output.on('close', () => {
-    console.log(archive.pointer() + ' total bytes');
-    console.log(
+    Log.info(archive.pointer() + ' total bytes');
+    Log.info(
       'archiver has been finalized and the output file descriptor has closed.'
     );
   });
 
   output.on('end', () => {
-    console.log('Data has been drained');
+    Log.info('Data has been drained');
   });
 
   archive.on('warning', err => {
     if (err.code === 'ENOENT') {
       // log warning
     } else {
-      // throw error
+      Log.error(err.message);
       throw err;
     }
   });
 
   archive.on('error', err => {
+    Log.error(err.message);
     throw err;
   });
 
   archive.pipe(output);
 
-  console.log(`Adding package.json to the zip file: ${zipName}`);
+  Log.info(`Adding package.json to the zip file: ${zipName}`);
   archive.file('package.json', {name: 'package.json'});
-  console.log(`Adding node_modules to the zip file: ${zipName}`);
+  Log.info(`Adding node_modules to the zip file: ${zipName}`);
   archive.directory('node_modules/', 'node_modules');
-  console.log(`Adding dist to the zip file: ${zipName}`);
+  Log.info(`Adding dist to the zip file: ${zipName}`);
   archive.directory('dist/', 'dist');
   await archive.finalize();
-  console.log(`Zip file ${zipName} created`);
+  Log.info(`Zip file ${zipName} created`);
   return `${pathToZipFile}/${zipName}`;
 };
