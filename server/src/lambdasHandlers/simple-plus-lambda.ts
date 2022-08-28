@@ -1,7 +1,17 @@
-export const plusLambdaHandler = `lib/src/simple-plus-lambda.plus`;
+import {Context, APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
 
-export const plus = () => {
-  const a = 10;
-  const b = 10;
-  return a + b;
+export const plusLambdaHandler = `dist/src/lambdasHandlers/simple-plus-lambda.plus`;
+
+export const plus = async (
+  event: APIGatewayEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> => {
+  console.log(`Event: ${JSON.stringify(event, null, 2)}`);
+  console.log(`Context: ${JSON.stringify(context, null, 2)}`);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: 'hello world',
+    }),
+  };
 };

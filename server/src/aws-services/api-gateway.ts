@@ -21,7 +21,7 @@ interface Resource {
   restApiId: string;
 }
 
-export class ApiGate {
+export class ApiGateway {
   id: string | null = null;
   constructor(private apiName: string) {}
 
@@ -139,6 +139,7 @@ export class ApiGate {
   };
 
   readonly createResource = async (resourceName: string): Promise<Resource> => {
+    Log.info(`Creating resource ${resourceName}`);
     return await awsCommand(
       async (): Promise<Resource> => {
         if (isNull(this.id)) {
@@ -160,8 +161,8 @@ export class ApiGate {
         const data = await apiGatewayClient
           .createResource(createResourceReq)
           .promise();
-        Log.info(`Resource for ${this.apiName} is created`);
         throwIfUndefined(data.id);
+        Log.info(`Resource ${resourceName} creating`);
         return {
           id: data.id,
           parentId: data.parentId ?? null,
@@ -184,6 +185,81 @@ export class ApiGate {
 
         await apiGatewayClient.deleteResource(deleteResourceReq).promise();
         Log.info(`Resource for ${this.apiName} has deleted`);
+      },
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+
+  readonly putMethod = async (
+    resource: Resource,
+    method: 'POST' | 'GET'
+  ): Promise<void> => {
+    Log.info(`Adding method ${method} for resource ${resource.id}`);
+    return await awsCommand(
+      async (): Promise<void> => {
+        const putMethodReq: AWS.APIGateway.PutMethodRequest = {
+          authorizationType: 'NONE',
+          httpMethod: method,
+          resourceId: resource.id,
+          restApiId: resource.restApiId,
+        };
+        await apiGatewayClient.putMethod(putMethodReq).promise();
+        Log.info(`Method ${method} for resource ${resource.id} has added`);
+      },
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+
+  readonly putIntegration = async (
+    resource: Resource,
+    lambdaArn: string,
+    httpMethod: 'POST' | 'GET'
+  ): Promise<void> => {
+    Log.info(`Adding integration for resource ${resource.id}`);
+    return await awsCommand(
+      async (): Promise<void> => {
+        const uri = `arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/${lambdaArn}/invocations`;
+        Log.info(`URI is ${uri}`);
+        const putIntegrationReq: AWS.APIGateway.PutIntegrationRequest = {
+          httpMethod: httpMethod,
+          restApiId: resource.restApiId,
+          resourceId: resource.id,
+          integrationHttpMethod: httpMethod,
+          type: 'AWS',
+          uri: uri,
+        };
+        await apiGatewayClient.putIntegration(putIntegrationReq).promise();
+        Log.info(`Integration for resource ${resource.id} has added`);
+      },
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+
+  readonly putIntegrationResponce = async (
+    resource: Resource,
+    lambdaArn: string,
+    httpMethod: 'POST' | 'GET'
+  ): Promise<void> => {
+    Log.info(`Adding integration responce for resource ${resource.id}`);
+    return await awsCommand(
+      async (): Promise<void> => {
+        const putIntegrationResponseReq: AWS.APIGateway.PutIntegrationResponseRequest =
+          {
+            httpMethod: httpMethod,
+            restApiId: resource.restApiId,
+            resourceId: resource.id,
+            statusCode: '200',
+          };
+        await apiGatewayClient
+          .putIntegrationResponse(putIntegrationResponseReq)
+          .promise();
+        Log.info(`Integration for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;

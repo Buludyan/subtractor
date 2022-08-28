@@ -7,6 +7,8 @@ import {type} from 'os';
 import {
   archiveSourceCodeAndGetPath,
   sleep,
+  throwIfNull,
+  throwIfUndefined,
   TypeGuardOf,
 } from './utilities/common-utils';
 import {
@@ -14,14 +16,14 @@ import {
   videoNameTypeGuard,
   newVideoName,
 } from './project-specific-interfaces';
-import {ApiGate} from './aws-services/api-gateway';
+import {ApiGateway} from './aws-services/api-gateway';
 import {Log} from './utilities/log';
 import {Lambda} from './aws-services/lambda';
 import {plusLambdaHandler} from './lambdasHandlers/simple-plus-lambda';
 
 Log.info(`Compilation passed successfully!`);
 const apiGatewayTest = async () => {
-  const apiGate = new ApiGate('testApi2');
+  const apiGate = new ApiGateway('testApi2');
   await apiGate.construct();
   const levon = await apiGate.createResource('levon');
   const arman = await apiGate.createResource('arman');
@@ -82,6 +84,49 @@ const lambdaDeployExample = async () => {
   await lambda.destroy();
 };
 
-const main = async () => {};
+const apiPlusLambdaDeployExample = async () => {
+  const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
+  await s3Bucket.construct();
+  const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
+  await s3Bucket.sendFile(
+    lambdaZipFilePath,
+    lambdaZipFilePath,
+    'application/zip'
+  );
+  const lambda: Lambda = new Lambda(
+    `my-custom-lambda`,
+    Constants.lambdaZipFileS3BucketName,
+    lambdaZipFilePath,
+    plusLambdaHandler
+  );
+  await lambda.construct();
+  const apiGateway = new ApiGateway('subtractor');
+  await apiGateway.construct();
+  const upload = await apiGateway.createResource('upload');
+  const download = await apiGateway.createResource('download');
+  const method = 'POST';
+  await apiGateway.putMethod(upload, method);
+  const lambdaArn = await lambda.getArn();
+  throwIfNull(lambdaArn);
+  await apiGateway.putIntegration(upload, lambdaArn, method);
+  const msecs = 60000;
+  Log.info(`Waiting for ${msecs} msecs`);
+  await sleep(msecs);
+  Log.info(`Waiting for another ${msecs} msecs`);
+  await sleep(msecs);
+  Log.info(`Waiting for another ${msecs} msecs`);
+  await sleep(msecs);
+  Log.info(`Waiting for another ${msecs} msecs`);
+  await sleep(msecs);
+  Log.info(`Waiting for another ${msecs} msecs`);
+  await sleep(msecs);
+  Log.info(`Done`);
+  await lambda.destroy();
+  await apiGateway.destroy();
+};
+
+const main = async () => {
+  // await apiPlusLambdaDeployExample();
+};
 
 main().catch(err => Log.error(`Something bad happened: ${err}`));

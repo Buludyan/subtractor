@@ -4,7 +4,9 @@ import {
   IGuard,
   isNotNull,
   isNotUndefined,
+  isUndefined,
   makeSureThatXIs,
+  throwIfNull,
   throwIfUndefined,
   TypeGuardOf,
 } from '../utilities/common-utils';
@@ -24,7 +26,7 @@ export class Lambda {
   ) {}
 
   readonly construct = async (): Promise<void> => {
-    Log.info(`Constructing Lambda ${this.functionName} ARN`);
+    Log.info(`Constructing Lambda ${this.functionName}`);
     return awsCommand(
       async () => {
         const createFunctionRequest: AWS.Lambda.Types.CreateFunctionRequest = {
@@ -47,8 +49,15 @@ export class Lambda {
           Timeout: 1,
         };
         await lambdaClient.createFunction(createFunctionRequest).promise();
+        Log.info(`Lambda ${this.functionName} constructed`);
       },
-      async () => {
+      async err => {
+        if (err.code === 'ResourceConflictException') {
+          Log.info(
+            `Lambda ${this.functionName} is already constructed, skipping construction. Make sure, that lambda is deleted, is you want to update it's source code.`
+          );
+          return;
+        }
         return null;
       }
     );
@@ -68,9 +77,9 @@ export class Lambda {
     );
   };
 
-  readonly getArn = (): Promise<string | undefined> => {
+  readonly getArn = async (): Promise<string | null> => {
     Log.info(`Getting Lambda ${this.functionName} ARN`);
-    return awsCommand(
+    const arn = await awsCommand(
       async () => {
         const getFunctionParams: AWS.Lambda.Types.GetFunctionRequest = {
           FunctionName: this.functionName,
@@ -94,16 +103,17 @@ export class Lambda {
         return null;
       }
     );
+    return arn ?? null;
   };
-  readonly setTag = (tags: {[key: string]: string}) => {
+  readonly setTag = async (tags: {[key: string]: string}) => {
     Log.info(
       `Adding tags ${JSON.stringify(tags)} to Lambda ${this.functionName}`
     );
 
-    return awsCommand(
+    return await awsCommand(
       async () => {
         const lambdaArn = await this.getArn();
-        throwIfUndefined(lambdaArn);
+        throwIfNull(lambdaArn);
         const tagResourceReq: AWS.Lambda.Types.TagResourceRequest = {
           Resource: lambdaArn,
           Tags: {
@@ -128,11 +138,11 @@ export class Lambda {
       }
     );
   };
-  readonly getTag = (tagName: string) => {
-    return awsCommand(
+  readonly getTag = async (tagName: string) => {
+    return await awsCommand(
       async () => {
         const lambdaARN = await this.getArn();
-        throwIfUndefined(lambdaARN);
+        throwIfNull(lambdaARN);
         Log.info(`Getting tags from Lambda ${lambdaARN}`);
         const data = await lambdaClient
           .listTags({Resource: lambdaARN})
