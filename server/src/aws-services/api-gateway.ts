@@ -4,14 +4,15 @@ import {
   isNotNull,
   isNull,
   isUndefined,
+  throwIfNull,
   throwIfUndefined,
 } from '../utilities/common-utils';
 import {Log} from '../utilities/log';
 import {awsCommand} from './aws-common-utils';
-
+const awsRegion = 'eu-central-1';
 const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
   apiVersion: '2015-07-09',
-  region: 'eu-central-1',
+  region: awsRegion,
 });
 
 interface Resource {
@@ -25,7 +26,7 @@ export class ApiGateway {
   id: string | null = null;
   constructor(private apiName: string) {}
 
-  readonly getId = async (): Promise<string | null> => {
+  private readonly getId = async (): Promise<string | null> => {
     return await awsCommand(
       async (): Promise<string | null> => {
         const getRestAPIsReq: AWS.APIGateway.GetRestApisRequest = {};
@@ -47,7 +48,7 @@ export class ApiGateway {
     );
   };
 
-  readonly getResources = async (): Promise<Resource[]> => {
+  private readonly getResources = async (): Promise<Resource[]> => {
     return await awsCommand(
       async (): Promise<Resource[]> => {
         if (isNull(this.id)) {
@@ -83,7 +84,7 @@ export class ApiGateway {
     );
   };
 
-  readonly getRootResourceId = async (): Promise<string> => {
+  private readonly getRootResourceId = async (): Promise<string> => {
     const resources = await this.getResources();
     const rootResource = resources.find(e => e.path === '/');
     throwIfUndefined(rootResource);
@@ -138,7 +139,22 @@ export class ApiGateway {
     );
   };
 
-  readonly createResource = async (resourceName: string): Promise<Resource> => {
+  readonly createNewResource = async (
+    resourceName: string,
+    lambdaArn: string,
+    method: 'GET' | 'POST'
+  ): Promise<Resource> => {
+    const resource = await this.createResource(resourceName);
+    await this.putMethod(resource, method);
+    await this.putMethodResponse(resource, method);
+    await this.putIntegration(resource, lambdaArn, method);
+    await this.putIntegrationResponse(resource, method);
+    return resource;
+  };
+
+  private readonly createResource = async (
+    resourceName: string
+  ): Promise<Resource> => {
     Log.info(`Creating resource ${resourceName}`);
     return await awsCommand(
       async (): Promise<Resource> => {
@@ -175,7 +191,34 @@ export class ApiGateway {
       }
     );
   };
-  readonly deleteResource = async (resource: Resource): Promise<void> => {
+
+  readonly createDeployment = async (): Promise<string> => {
+    const restApiId = await this.getId();
+    throwIfNull(restApiId);
+    Log.info(`Creating deployment for ${restApiId}`);
+    return await awsCommand(
+      async (): Promise<string> => {
+        const createDeploymentReq: AWS.APIGateway.CreateDeploymentRequest = {
+          restApiId: restApiId,
+          stageName: this.apiName,
+        };
+        const data = await apiGatewayClient
+          .createDeployment(createDeploymentReq)
+          .promise();
+        Log.info(
+          `Deployment ${restApiId} created, data ${JSON.stringify(data)}`
+        );
+        return `https://${restApiId}.execute-api.${awsRegion}.amazonaws.com/${this.apiName}`;
+      },
+      async (): Promise<string | null> => {
+        return null;
+      }
+    );
+  };
+
+  private readonly deleteResource = async (
+    resource: Resource
+  ): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
         const deleteResourceReq: AWS.APIGateway.DeleteResourceRequest = {
@@ -191,8 +234,7 @@ export class ApiGateway {
       }
     );
   };
-
-  readonly putMethod = async (
+  private readonly putMethod = async (
     resource: Resource,
     method: 'POST' | 'GET'
   ): Promise<void> => {
@@ -213,8 +255,7 @@ export class ApiGateway {
       }
     );
   };
-
-  readonly putIntegration = async (
+  private readonly putIntegration = async (
     resource: Resource,
     lambdaArn: string,
     httpMethod: 'POST' | 'GET'
@@ -222,7 +263,7 @@ export class ApiGateway {
     Log.info(`Adding integration for resource ${resource.id}`);
     return await awsCommand(
       async (): Promise<void> => {
-        const uri = `arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/${lambdaArn}/invocations`;
+        const uri = `arn:aws:apigateway:${awsRegion}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations`;
         Log.info(`URI is ${uri}`);
         const putIntegrationReq: AWS.APIGateway.PutIntegrationRequest = {
           httpMethod: httpMethod,
@@ -240,10 +281,8 @@ export class ApiGateway {
       }
     );
   };
-
-  readonly putIntegrationResponce = async (
+  private readonly putIntegrationResponse = async (
     resource: Resource,
-    lambdaArn: string,
     httpMethod: 'POST' | 'GET'
   ): Promise<void> => {
     Log.info(`Adding integration responce for resource ${resource.id}`);
@@ -259,7 +298,31 @@ export class ApiGateway {
         await apiGatewayClient
           .putIntegrationResponse(putIntegrationResponseReq)
           .promise();
-        Log.info(`Integration for resource ${resource.id} has added`);
+        Log.info(`Integration response for resource ${resource.id} has added`);
+      },
+      async (): Promise<void | null> => {
+        return null;
+      }
+    );
+  };
+  private readonly putMethodResponse = async (
+    resource: Resource,
+    httpMethod: 'POST' | 'GET'
+  ): Promise<void> => {
+    Log.info(`Adding method response for resource ${resource.id}`);
+    return await awsCommand(
+      async (): Promise<void> => {
+        const putMethodResponseReq: AWS.APIGateway.PutMethodResponseRequest = {
+          httpMethod: httpMethod,
+          restApiId: resource.restApiId,
+          resourceId: resource.id,
+          statusCode: '200',
+          responseModels: {'application/json': 'Empty'},
+        };
+        await apiGatewayClient
+          .putMethodResponse(putMethodResponseReq)
+          .promise();
+        Log.info(`Method response for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;

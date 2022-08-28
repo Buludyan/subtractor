@@ -22,28 +22,6 @@ import {Lambda} from './aws-services/lambda';
 import {plusLambdaHandler} from './lambdasHandlers/simple-plus-lambda';
 
 Log.info(`Compilation passed successfully!`);
-const apiGatewayTest = async () => {
-  const apiGate = new ApiGateway('testApi2');
-  await apiGate.construct();
-  const levon = await apiGate.createResource('levon');
-  const arman = await apiGate.createResource('arman');
-  const rubicock = await apiGate.createResource('rubicock');
-  Log.info(levon.id);
-  Log.info(arman.id);
-  Log.info(rubicock.id);
-  await sleep(10000);
-  Log.info('after 10000');
-  await apiGate.deleteResource(rubicock);
-  await sleep(5000);
-  Log.info('after 5000');
-  await apiGate.deleteResource(levon);
-  await sleep(5000);
-  Log.info('after 5000');
-  await apiGate.deleteResource(arman);
-  await sleep(5000);
-  Log.info('after 5000');
-  await apiGate.destroy();
-};
 
 const dynamoDbExample = async () => {
   const myTable = new KeyValueStore<IVideoName>(
@@ -100,15 +78,22 @@ const apiPlusLambdaDeployExample = async () => {
     plusLambdaHandler
   );
   await lambda.construct();
-  const apiGateway = new ApiGateway('subtractor');
-  await apiGateway.construct();
-  const upload = await apiGateway.createResource('upload');
-  const download = await apiGateway.createResource('download');
-  const method = 'POST';
-  await apiGateway.putMethod(upload, method);
   const lambdaArn = await lambda.getArn();
   throwIfNull(lambdaArn);
-  await apiGateway.putIntegration(upload, lambdaArn, method);
+  const apiGateway = new ApiGateway('subtractor');
+  await apiGateway.construct();
+  const upload = await apiGateway.createNewResource(
+    'upload',
+    lambdaArn,
+    'POST'
+  );
+  const download = await apiGateway.createNewResource(
+    'download',
+    lambdaArn,
+    'POST'
+  );
+  const apiUrl = await apiGateway.createDeployment();
+  Log.info(`apiUrl = ${apiUrl}`);
   const msecs = 60000;
   Log.info(`Waiting for ${msecs} msecs`);
   await sleep(msecs);
@@ -126,7 +111,7 @@ const apiPlusLambdaDeployExample = async () => {
 };
 
 const main = async () => {
-  // await apiPlusLambdaDeployExample();
+  await apiPlusLambdaDeployExample();
 };
 
 main().catch(err => Log.error(`Something bad happened: ${err}`));

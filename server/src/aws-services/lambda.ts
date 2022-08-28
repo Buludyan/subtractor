@@ -50,6 +50,21 @@ export class Lambda {
         };
         await lambdaClient.createFunction(createFunctionRequest).promise();
         Log.info(`Lambda ${this.functionName} constructed`);
+        const arn = await this.getArn();
+        throwIfNull(arn);
+        Log.info(
+          `Granting InvokdeFunction permission to lambda ${this.functionName}`
+        );
+        const addPermisionRequest: AWS.Lambda.Types.AddPermissionRequest = {
+          Action: 'lambda:InvokeFunction',
+          Principal: 'apigateway.amazonaws.com',
+          FunctionName: arn,
+          StatementId: 'lambdaApiGatewayAddInvokeFunctionPermission',
+        };
+        await lambdaClient.addPermission(addPermisionRequest).promise();
+        Log.info(
+          `Permission InvokdeFunction granted to lambda ${this.functionName}`
+        );
       },
       async err => {
         if (err.code === 'ResourceConflictException') {
