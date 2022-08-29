@@ -51,16 +51,19 @@ const dynamoDbExample = async () => {
   await myTable.construct();
   await sleep(5000);
   await myTable.putRecord('a', newVideoName('v1.mp4'));
-  await myTable.putRecord('b', newVideoName('v2.mp4'));
+  await myTable.updateRecord('a', newVideoName('v2.mp4'));
+  /*   await myTable.putRecord('b', newVideoName('v2.mp4'));
   await myTable.putRecord('c', newVideoName('v3.mp4'));
   await myTable.putRecord('d', newVideoName('v4.mp4'));
   const item = await myTable.getRecord('d');
   item.videoName = 'v5.mp4';
-  await myTable.putRecord('d*', item);
+  await myTable.putRecord('d*', item); */
 
   await sleep(30000);
   await myTable.destroy();
 };
+
+dynamoDbExample();
 
 const lambdaDeployExample = async () => {
   const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
