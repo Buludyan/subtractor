@@ -1,3 +1,4 @@
+import {IVideoName} from './../project-specific-interfaces';
 import {Log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
@@ -56,7 +57,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceInUseException') {
-          Log.error(`Table ${this.tableName} is already created`);
+          Log.info(`Table ${this.tableName} is already created`);
           return;
         }
         return null;
@@ -105,6 +106,38 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
           Log.error(`Item ${hashKey} is already existed`);
           return;
         }
+        return null;
+      }
+    );
+  };
+  readonly updateRecord = async (
+    hashKey: string,
+    record: RecordType
+  ): Promise<void> => {
+    return await awsCommand(
+      async (): Promise<void> => {
+        Log.info(
+          `Updating item ${hashKey} with record ${JSON.stringify(record)}`
+        );
+        const updateItemReq: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+          TableName: this.tableName,
+          Key: {
+            hashKey: hashKey,
+          },
+          UpdateExpression: 'set #record = :record',
+          ExpressionAttributeNames: {
+            '#record': 'record',
+          },
+          ExpressionAttributeValues: {
+            ':record': record,
+          },
+          ConditionExpression: 'attribute_exists(hashKey)',
+        };
+
+        await dynamoDocClient.update(updateItemReq).promise();
+        Log.info(`Item ${hashKey} is updated`);
+      },
+      async (): Promise<void | null> => {
         return null;
       }
     );
