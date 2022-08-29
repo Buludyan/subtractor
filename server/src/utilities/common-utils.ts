@@ -1,6 +1,5 @@
 import {Log} from './log';
 import archiver = require('archiver');
-//import {Type} from 'aws-sdk/clients/cloudformation';
 import * as fs from 'fs';
 
 export interface IGuard<TypeGuard> {
