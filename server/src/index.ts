@@ -113,8 +113,25 @@ const apiPlusLambdaDeployExample = async () => {
   await apiGateway.destroy();
 };
 
+const f = () => {
+  Log.throw('Exception');
+};
+
+const g = () => {
+  try {
+    f();
+  } catch (err) {
+    Log.rethrow('Rethrowing...', err);
+  }
+};
+
+const h = () => {
+  g();
+};
+
 const main = async () => {
-  await apiPlusLambdaDeployExample();
+  // await apiPlusLambdaDeployExample();
+  g();
 };
 
 main().catch(err => Log.error(`Something bad happened: ${err}`));
