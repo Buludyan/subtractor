@@ -1,4 +1,4 @@
-import {Log} from './../utilities/log';
+import {log} from './../utilities/log';
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as awsCommonUtils from './aws-common-utils';
@@ -13,16 +13,16 @@ export class S3Bucket {
   constructor(private bucketName: string) {}
 
   readonly construct = async () => {
-    Log.info(`Constructing S3 bucket ${this.bucketName}`);
+    log.info(`Constructing S3 bucket ${this.bucketName}`);
     return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
         await s3Client.createBucket({Bucket: this.bucketName}).promise();
-        Log.info(`S3 bucket constructed ${this.bucketName}`);
+        log.info(`S3 bucket constructed ${this.bucketName}`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'BucketAlreadyOwnedByYou') {
-          Log.error(
+          log.error(
             `Bucket ${this.bucketName} already owned by you, skipping creation.`
           );
           return;
@@ -32,16 +32,16 @@ export class S3Bucket {
     );
   };
   readonly destroy = async () => {
-    Log.info(`Destroying s3 bucket ${this.bucketName}`);
+    log.info(`Destroying s3 bucket ${this.bucketName}`);
     return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
         await s3Client.deleteBucket({Bucket: this.bucketName}).promise();
-        Log.info(`S3 bucket destroyed ${this.bucketName}`);
+        log.info(`S3 bucket destroyed ${this.bucketName}`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'NoSuchBucket') {
-          Log.error(
+          log.error(
             `Bucket ${this.bucketName} does not exist, nothing to delete!`
           );
           return;
@@ -56,7 +56,7 @@ export class S3Bucket {
     filePath: string,
     contentType: string
   ): Promise<void> => {
-    Log.info(`Sending file ${fileName} to s3 bucket ${this.bucketName}`);
+    log.info(`Sending file ${fileName} to s3 bucket ${this.bucketName}`);
     return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
         // TODO: check other parameters
@@ -70,7 +70,7 @@ export class S3Bucket {
         };
         await s3Client.putObject(putObjectReq).promise();
 
-        Log.info(`File sent ${fileName} to s3 bucket ${this.bucketName}`);
+        log.info(`File sent ${fileName} to s3 bucket ${this.bucketName}`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -78,7 +78,7 @@ export class S3Bucket {
     );
   };
   readonly getFile = async (fileName: string): Promise<string | null> => {
-    Log.info(`Getting file ${fileName} from S3 bucket ${this.bucketName}`);
+    log.info(`Getting file ${fileName} from S3 bucket ${this.bucketName}`);
     return await awsCommonUtils.awsCommand(
       async (): Promise<string> => {
         // TODO: check other parameters
@@ -87,7 +87,7 @@ export class S3Bucket {
           Key: fileName,
         };
         const response = await s3Client.getObject(getObjectReq).promise();
-        Log.info(`File ${fileName} got from S3 bucket ${this.bucketName}`);
+        log.info(`File ${fileName} got from S3 bucket ${this.bucketName}`);
         // TODO: refine this
         return response.Body as string;
       },

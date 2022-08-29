@@ -7,7 +7,7 @@ import {
   throwIfNull,
   throwIfUndefined,
 } from '../utilities/common-utils';
-import {Log} from '../utilities/log';
+import {log, Log} from '../utilities/log';
 import {awsCommand} from './aws-common-utils';
 const awsRegion = 'eu-central-1';
 const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
@@ -39,7 +39,7 @@ export class ApiGateway {
           return null;
         }
         throwIfUndefined(restApi.id);
-        Log.info(`Api ${this.apiName} ID is retrieved`);
+        log.info(`Api ${this.apiName} ID is retrieved`);
         return restApi.id;
       },
       async (): Promise<string | null> => {
@@ -55,11 +55,11 @@ export class ApiGateway {
           const id = await this.getId();
           if (isNull(id)) {
             const errorMessage = `There is no restApi with name ${this.apiName}`;
-            Log.error(errorMessage);
-            throw new Error(errorMessage);
+            log.throw(errorMessage);
           }
           this.id = id;
         }
+        throwIfNull(this.id);
         const getResourcesReq: AWS.APIGateway.GetResourcesRequest = {
           restApiId: this.id,
         };
@@ -106,7 +106,7 @@ export class ApiGateway {
           .promise();
         throwIfUndefined(data.id);
         this.id = data.id;
-        Log.info(`Api ${this.apiName} is created`);
+        log.info(`Api ${this.apiName} is created`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -119,7 +119,7 @@ export class ApiGateway {
         if (isNull(this.id)) {
           const id = await this.getId();
           if (isNull(id)) {
-            Log.info(`There is no restApi with name ${this.apiName}`);
+            log.info(`There is no restApi with name ${this.apiName}`);
             return;
           }
           this.id = id;
@@ -131,7 +131,7 @@ export class ApiGateway {
 
         await apiGatewayClient.deleteRestApi(deleteRestAPIReq).promise();
         this.id = null;
-        Log.info(`Api ${this.apiName} has deleted`);
+        log.info(`Api ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -155,16 +155,12 @@ export class ApiGateway {
   private readonly createResource = async (
     resourceName: string
   ): Promise<Resource> => {
-    Log.info(`Creating resource ${resourceName}`);
+    log.info(`Creating resource ${resourceName}`);
     return await awsCommand(
       async (): Promise<Resource> => {
         if (isNull(this.id)) {
           const id = await this.getId();
-          if (isNull(id)) {
-            const errorMessage = `There is no restApi with name ${this.apiName}`;
-            Log.error(errorMessage);
-            throw new Error(errorMessage);
-          }
+          throwIfNull(id, `There is no restApi with name ${this.apiName}`);
           this.id = id;
         }
 
@@ -178,7 +174,7 @@ export class ApiGateway {
           .createResource(createResourceReq)
           .promise();
         throwIfUndefined(data.id);
-        Log.info(`Resource ${resourceName} creating`);
+        log.info(`Resource ${resourceName} creating`);
         return {
           id: data.id,
           parentId: data.parentId ?? null,
@@ -195,7 +191,7 @@ export class ApiGateway {
   readonly createDeployment = async (): Promise<string> => {
     const restApiId = await this.getId();
     throwIfNull(restApiId);
-    Log.info(`Creating deployment for ${restApiId}`);
+    log.info(`Creating deployment for ${restApiId}`);
     return await awsCommand(
       async (): Promise<string> => {
         const createDeploymentReq: AWS.APIGateway.CreateDeploymentRequest = {
@@ -205,7 +201,7 @@ export class ApiGateway {
         const data = await apiGatewayClient
           .createDeployment(createDeploymentReq)
           .promise();
-        Log.info(
+        log.info(
           `Deployment ${restApiId} created, data ${JSON.stringify(data)}`
         );
         return `https://${restApiId}.execute-api.${awsRegion}.amazonaws.com/${this.apiName}`;
@@ -227,7 +223,7 @@ export class ApiGateway {
         };
 
         await apiGatewayClient.deleteResource(deleteResourceReq).promise();
-        Log.info(`Resource for ${this.apiName} has deleted`);
+        log.info(`Resource for ${this.apiName} has deleted`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -238,7 +234,7 @@ export class ApiGateway {
     resource: Resource,
     method: 'POST' | 'GET'
   ): Promise<void> => {
-    Log.info(`Adding method ${method} for resource ${resource.id}`);
+    log.info(`Adding method ${method} for resource ${resource.id}`);
     return await awsCommand(
       async (): Promise<void> => {
         const putMethodReq: AWS.APIGateway.PutMethodRequest = {
@@ -248,7 +244,7 @@ export class ApiGateway {
           restApiId: resource.restApiId,
         };
         await apiGatewayClient.putMethod(putMethodReq).promise();
-        Log.info(`Method ${method} for resource ${resource.id} has added`);
+        log.info(`Method ${method} for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -260,11 +256,11 @@ export class ApiGateway {
     lambdaArn: string,
     httpMethod: 'POST' | 'GET'
   ): Promise<void> => {
-    Log.info(`Adding integration for resource ${resource.id}`);
+    log.info(`Adding integration for resource ${resource.id}`);
     return await awsCommand(
       async (): Promise<void> => {
         const uri = `arn:aws:apigateway:${awsRegion}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations`;
-        Log.info(`URI is ${uri}`);
+        log.info(`URI is ${uri}`);
         const putIntegrationReq: AWS.APIGateway.PutIntegrationRequest = {
           httpMethod: httpMethod,
           restApiId: resource.restApiId,
@@ -274,7 +270,7 @@ export class ApiGateway {
           uri: uri,
         };
         await apiGatewayClient.putIntegration(putIntegrationReq).promise();
-        Log.info(`Integration for resource ${resource.id} has added`);
+        log.info(`Integration for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -285,7 +281,7 @@ export class ApiGateway {
     resource: Resource,
     httpMethod: 'POST' | 'GET'
   ): Promise<void> => {
-    Log.info(`Adding integration responce for resource ${resource.id}`);
+    log.info(`Adding integration responce for resource ${resource.id}`);
     return await awsCommand(
       async (): Promise<void> => {
         const putIntegrationResponseReq: AWS.APIGateway.PutIntegrationResponseRequest =
@@ -298,7 +294,7 @@ export class ApiGateway {
         await apiGatewayClient
           .putIntegrationResponse(putIntegrationResponseReq)
           .promise();
-        Log.info(`Integration response for resource ${resource.id} has added`);
+        log.info(`Integration response for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -309,7 +305,7 @@ export class ApiGateway {
     resource: Resource,
     httpMethod: 'POST' | 'GET'
   ): Promise<void> => {
-    Log.info(`Adding method response for resource ${resource.id}`);
+    log.info(`Adding method response for resource ${resource.id}`);
     return await awsCommand(
       async (): Promise<void> => {
         const putMethodResponseReq: AWS.APIGateway.PutMethodResponseRequest = {
@@ -322,7 +318,7 @@ export class ApiGateway {
         await apiGatewayClient
           .putMethodResponse(putMethodResponseReq)
           .promise();
-        Log.info(`Method response for resource ${resource.id} has added`);
+        log.info(`Method response for resource ${resource.id} has added`);
       },
       async (): Promise<void | null> => {
         return null;

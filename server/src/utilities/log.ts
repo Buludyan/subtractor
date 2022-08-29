@@ -21,7 +21,7 @@ type Exception = {
   stack: CallStackEntry[];
 };
 
-const getCallStack = (exception: Error | null): CallStackEntry[] => {
+const retrieveCallStack = (exception: Error | null): CallStackEntry[] => {
   const unmappedCallstack = isNull(exception)
     ? StackTrace.get()
     : StackTrace.parse(exception);
@@ -51,7 +51,7 @@ const getCallStack = (exception: Error | null): CallStackEntry[] => {
 };
 
 /** @internal */
-const getException = (exception: unknown): Exception | null => {
+const processException = (exception: unknown): Exception | null => {
   const isError = (exception: unknown): exception is Error => {
     return (
       !isUndefined((exception as Error).stack) &&
@@ -71,7 +71,7 @@ const getException = (exception: unknown): Exception | null => {
   return {
     message: exception.message,
     typeName: exception.name,
-    stack: getCallStack(exception),
+    stack: retrieveCallStack(exception),
   };
 };
 
@@ -79,11 +79,20 @@ const stackEntryToString = (entry: CallStackEntry) => {
   return `[${entry.sourceLocation.sourceFilePath}:${entry.sourceLocation.row}:${entry.sourceLocation.col}] [${entry.functionName}]`;
 };
 
-export class Log {
-  static readonly error = async (message: string) => {
+export interface ILog {
+  readonly error: (message: string) => void;
+  readonly info: (message: string) => void;
+  readonly trace: (message: string) => void;
+  readonly throw: (message: string) => never;
+  readonly rethrow: (message: string, err: unknown) => never;
+  readonly fatal: (message: string) => void;
+}
+
+export class Log implements ILog {
+  readonly error = (message: string) => {
     _log.error(`Message: ${message}`);
     _log.error(
-      `CallStack:\n${getCallStack(null)
+      `CallStack:\n${retrieveCallStack(null)
         .map(elem => stackEntryToString(elem))
         .join('\n')}`
     );
@@ -91,18 +100,18 @@ export class Log {
     // process stacktrace (SourceMapping)
     // send to cloud watch
   };
-  static readonly info = async (message: string) => {
+  readonly info = (message: string) => {
     _log.info(message);
   };
-  static readonly trace = async (message: string) => {
+  readonly trace = (message: string) => {
     _log.trace(message);
   };
-  static readonly throw = async (message: string) => {
+  readonly throw = (message: string): never => {
     this.error(message);
     throw new Error(message);
   };
-  static readonly rethrow = async (message: string, err: unknown) => {
-    const ex = getException(err);
+  readonly rethrow = (message: string, err: unknown): never => {
+    const ex = processException(err);
     if (isNull(ex)) {
       _log.error(`Message: ${message}`);
       throw err;
@@ -115,7 +124,9 @@ export class Log {
     );
     throw err;
   };
-  static readonly fatal = async (message: string) => {
+  readonly fatal = (message: string) => {
     _log.fatal(message);
   };
 }
+
+export const log = new Log();

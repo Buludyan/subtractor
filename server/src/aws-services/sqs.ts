@@ -1,4 +1,4 @@
-import {Log} from './../utilities/log';
+import {log} from './../utilities/log';
 import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
@@ -46,7 +46,7 @@ export class SQS {
         };
         const data = await sqsClient.deleteQueue(deleteParams).promise();
         await Utils.sleep(60000);
-        Log.info(`Queue ${this.queueName} successfully deleted!`);
+        log.info(`Queue ${this.queueName} successfully deleted!`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -60,7 +60,7 @@ export class SQS {
 
         // TODO: handle several pages of queues
         const data = await sqsClient.listQueues(createParams).promise();
-        Log.info(`${data.QueueUrls}`);
+        log.info(`${data.QueueUrls}`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -89,7 +89,7 @@ export class SQS {
           .getQueueAttributes(queueAttrParams)
           .promise();
 
-        Log.info(`${queueArn}`);
+        log.info(`${queueArn}`);
       },
       async (): Promise<void | null> => {
         return null;

@@ -17,11 +17,11 @@ import {
   newVideoName,
 } from './project-specific-interfaces';
 import {ApiGateway} from './aws-services/api-gateway';
-import {Log} from './utilities/log';
+import {log} from './utilities/log';
 import {Lambda} from './aws-services/lambda';
 import {plusLambdaHandler} from './lambdasHandlers/simple-plus-lambda';
 
-Log.info(`Compilation passed successfully!`);
+log.info(`Compilation passed successfully!`);
 
 const dynamoDbExample = async () => {
   const myTable = new KeyValueStore<IVideoName>(
@@ -96,32 +96,32 @@ const apiPlusLambdaDeployExample = async () => {
     'POST'
   );
   const apiUrl = await apiGateway.createDeployment();
-  Log.info(`apiUrl = ${apiUrl}`);
+  log.info(`apiUrl = ${apiUrl}`);
   const msecs = 60000;
-  Log.info(`Waiting for ${msecs} msecs`);
+  log.info(`Waiting for ${msecs} msecs`);
   await sleep(msecs);
-  Log.info(`Waiting for another ${msecs} msecs`);
+  log.info(`Waiting for another ${msecs} msecs`);
   await sleep(msecs);
-  Log.info(`Waiting for another ${msecs} msecs`);
+  log.info(`Waiting for another ${msecs} msecs`);
   await sleep(msecs);
-  Log.info(`Waiting for another ${msecs} msecs`);
+  log.info(`Waiting for another ${msecs} msecs`);
   await sleep(msecs);
-  Log.info(`Waiting for another ${msecs} msecs`);
+  log.info(`Waiting for another ${msecs} msecs`);
   await sleep(msecs);
-  Log.info(`Done`);
+  log.info(`Done`);
   await lambda.destroy();
   await apiGateway.destroy();
 };
 
 const f = () => {
-  Log.throw('Exception');
+  log.throw('Exception');
 };
 
 const g = () => {
   try {
     f();
   } catch (err) {
-    Log.rethrow('Rethrowing...', err);
+    log.rethrow('Rethrowing...', err);
   }
 };
 
@@ -131,7 +131,7 @@ const h = () => {
 
 const main = async () => {
   // await apiPlusLambdaDeployExample();
-  g();
+  h();
 };
 
-main().catch(err => Log.error(`Something bad happened: ${err}`));
+main().catch(err => log.error(`Something bad happened: ${err}`));

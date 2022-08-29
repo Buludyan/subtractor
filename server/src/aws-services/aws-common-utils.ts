@@ -1,4 +1,4 @@
-import {Log} from './../utilities/log';
+import {log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as Utils from '../utilities/common-utils';
 
@@ -20,7 +20,7 @@ export const awsCommand = async <ResultType>(
     const duration = now - start;
     if (duration >= maximalWaitingTimeInMillis) {
       const errorMessage = `[NOT AWS] Time limit exceeded (${maximalWaitingTimeInMillis} msecs) for awsCommand function call.`;
-      Log.error(errorMessage);
+      log.error(errorMessage);
       throw Error(errorMessage);
     }
   };
@@ -33,7 +33,7 @@ export const awsCommand = async <ResultType>(
     } catch (err) {
       if (!isAwsError(err)) {
         const errorMessage = `[NOT AWS] Error occurred in awsCommand, err=${err}`;
-        Log.error(errorMessage);
+        log.error(errorMessage);
         throw Error(errorMessage);
       }
       if (err.retryable) {
@@ -46,7 +46,7 @@ export const awsCommand = async <ResultType>(
         return errorHandlerResult;
       }
       const errorMessage = `[AWS] Error occurred in awsCommand, err=${err}`;
-      Log.error(errorMessage);
+      log.error(errorMessage);
       throw Error(errorMessage);
     }
   }

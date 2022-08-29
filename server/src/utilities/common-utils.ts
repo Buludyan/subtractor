@@ -1,4 +1,4 @@
-import {Log} from './log';
+import {log} from './log';
 import archiver = require('archiver');
 import * as fs from 'fs';
 
@@ -29,7 +29,7 @@ export const isNotNull = (x: unknown): x is null => {
 
 export function throwIfNull<T>(x: T, message = ''): asserts x is NotNull<T> {
   if (isNull(x)) {
-    Log.error(message);
+    log.error(message);
     throw new Error(message);
   }
 }
@@ -38,7 +38,7 @@ export function throwIfUndefined<T>(
   message = ''
 ): asserts x is NotUndefined<T> {
   if (isUndefined(x)) {
-    Log.error(message);
+    log.error(message);
     throw new Error(message);
   }
 }
@@ -53,7 +53,7 @@ export function makeSureThatXIs<T>(
 ): asserts x is T {
   if ((x as IGuard<TypeGuardOf<T>>)._guard !== typeGuard) {
     const errorMessage = 'TypeGuard check failed';
-    Log.error(errorMessage);
+    log.error(errorMessage);
     throw new Error(errorMessage);
   }
 }
@@ -72,52 +72,52 @@ export const archiveSourceCodeAndGetPath = async () => {
   const pathToZipFile = 'codebases';
   fs.mkdir(`${pathToZipFile}`, {recursive: true}, err => {
     if (err) {
-      return Log.error(err.message);
+      return log.error(err.message);
     }
-    return Log.info(`Directory ${pathToZipFile} created successfully!`);
+    return log.info(`Directory ${pathToZipFile} created successfully!`);
   });
   const zipName = `codebase-${getCurrentDateAsString()}.zip`;
-  Log.info(`Creating zip file: ${pathToZipFile}/${zipName}`);
+  log.info(`Creating zip file: ${pathToZipFile}/${zipName}`);
   const output = fs.createWriteStream(`${pathToZipFile}/${zipName}`);
   const archive = archiver('zip', {
     zlib: {level: 9}, // Sets the compression level.
   });
 
   output.on('close', () => {
-    Log.info(archive.pointer() + ' total bytes');
-    Log.info(
+    log.info(archive.pointer() + ' total bytes');
+    log.info(
       'archiver has been finalized and the output file descriptor has closed.'
     );
   });
 
   output.on('end', () => {
-    Log.info('Data has been drained');
+    log.info('Data has been drained');
   });
 
   archive.on('warning', err => {
     if (err.code === 'ENOENT') {
       // log warning
     } else {
-      Log.error(err.message);
+      log.error(err.message);
       throw err;
     }
   });
 
   archive.on('error', err => {
-    Log.error(err.message);
+    log.error(err.message);
     throw err;
   });
 
   archive.pipe(output);
 
-  Log.info(`Adding package.json to the zip file: ${zipName}`);
+  log.info(`Adding package.json to the zip file: ${zipName}`);
   archive.file('package.json', {name: 'package.json'});
-  Log.info(`Adding node_modules to the zip file: ${zipName}`);
+  log.info(`Adding node_modules to the zip file: ${zipName}`);
   archive.directory('node_modules/', 'node_modules');
-  Log.info(`Adding dist to the zip file: ${zipName}`);
+  log.info(`Adding dist to the zip file: ${zipName}`);
   archive.directory('dist/', 'dist');
   await archive.finalize();
   await sleep(3000);
-  Log.info(`Zip file ${zipName} created`);
+  log.info(`Zip file ${zipName} created`);
   return `${pathToZipFile}/${zipName}`;
 };

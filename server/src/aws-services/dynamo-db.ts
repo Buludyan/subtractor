@@ -1,5 +1,5 @@
 import {IVideoName} from './../project-specific-interfaces';
-import {Log} from './../utilities/log';
+import {log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
 import {awsCommand} from './aws-common-utils';
@@ -53,11 +53,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoClient.createTable(createTableReq).promise();
-        Log.info(`Table ${this.tableName} is created`);
+        log.info(`Table ${this.tableName} is created`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceInUseException') {
-          Log.info(`Table ${this.tableName} is already created`);
+          log.info(`Table ${this.tableName} is already created`);
           return;
         }
         return null;
@@ -72,11 +72,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoClient.deleteTable(deleteTableReq).promise();
-        Log.info(`Table ${this.tableName} is deleted`);
+        log.info(`Table ${this.tableName} is deleted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceNotFoundException') {
-          Log.error(`Table ${this.tableName} is not found`);
+          log.error(`Table ${this.tableName} is not found`);
           return;
         }
         return null;
@@ -99,11 +99,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoDocClient.put(putItemInput).promise();
-        Log.info(`Item ${hashKey} is inserted`);
+        log.info(`Item ${hashKey} is inserted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ConditionalCheckFailedException') {
-          Log.error(`Item ${hashKey} is already existed`);
+          log.error(`Item ${hashKey} is already existed`);
           return;
         }
         return null;
@@ -116,7 +116,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
   ): Promise<void> => {
     return await awsCommand(
       async (): Promise<void> => {
-        Log.info(
+        log.info(
           `Updating item ${hashKey} with record ${JSON.stringify(record)}`
         );
         const updateItemReq: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
@@ -135,7 +135,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoDocClient.update(updateItemReq).promise();
-        Log.info(`Item ${hashKey} is updated`);
+        log.info(`Item ${hashKey} is updated`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -153,7 +153,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         const response = await dynamoDocClient.get(getItemInput).promise();
-        Log.info(`Successfully get ${JSON.stringify(response.Item)}`);
+        log.info(`Successfully get ${JSON.stringify(response.Item)}`);
         throwIfUndefined(response.Item);
         const record = response.Item.record;
         makeSureThatXIs<RecordType>(record, this.typeGuard);
@@ -176,11 +176,11 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         };
 
         await dynamoDocClient.delete(deleteItemInput).promise();
-        Log.info(`Item ${hashKey} was successfully deleted`);
+        log.info(`Item ${hashKey} was successfully deleted`);
       },
       async (err: AWSError): Promise<void | null> => {
         if (err.code === 'ResourceNotFoundException') {
-          Log.error(`Item ${hashKey} not found`);
+          log.error(`Item ${hashKey} not found`);
           return;
         }
         return null;
@@ -202,7 +202,7 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
         throwIfUndefined(data.Table);
         throwIfUndefined(data.Table.TableArn);
 
-        Log.info(`${this.tableName} arn is ${data.Table.TableArn}`);
+        log.info(`${this.tableName} arn is ${data.Table.TableArn}`);
       },
       async (): Promise<void | null> => {
         return null;
@@ -211,6 +211,6 @@ export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>> {
   };
   readonly cleanup = async (): Promise<void> => {
     // TODO: implement, create table here
-    throw new Error('Not implemented');
+    log.throw('Not implemented');
   };
 }

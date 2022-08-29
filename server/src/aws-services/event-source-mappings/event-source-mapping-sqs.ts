@@ -4,7 +4,7 @@ import {
   throwIfNull,
   throwIfUndefined,
 } from '../../utilities/common-utils';
-import {Log} from '../../utilities/log';
+import {log, Log} from '../../utilities/log';
 import {awsCommand} from '../aws-common-utils';
 
 const lambdaClient: AWS.Lambda = new AWS.Lambda({
@@ -16,7 +16,7 @@ export class EventSourceMappingSQS {
   uuid: string | null = null;
   constructor(private queueARN: string, private lambdaName: string) {}
   readonly construct = async () => {
-    Log.info(
+    log.info(
       `Creating event source mapping between lambda ${this.lambdaName} and queue ${this.queueARN}.`
     );
     this.uuid = await awsCommand(
@@ -37,15 +37,15 @@ export class EventSourceMappingSQS {
       },
       async (err): Promise<string | null> => {
         if (err.code === 'ResourceConflictException') {
-          Log.info(
+          log.info(
             `The EventSourceMapping already exists, or another operation is in progress.`
           );
           const uuid = err.message.match(/[\d\w-]+$/);
           if (isNull(uuid) || uuid.length === 0) {
             const message = `Error message does not contain uuid of EventSourceMapping, AWS error: ${err}`;
-            Log.error(message);
-            throw new Error(message);
+            log.rethrow(message, err);
           }
+          throwIfNull(uuid);
           return uuid[0];
         }
         return null;
@@ -56,7 +56,7 @@ export class EventSourceMappingSQS {
   readonly destroy = async () => {
     const eventSourceMappingUUID = this.uuid;
     throwIfNull(eventSourceMappingUUID);
-    Log.info(`Deleting event source mapping, UUID=${eventSourceMappingUUID}`);
+    log.info(`Deleting event source mapping, UUID=${eventSourceMappingUUID}`);
     return await awsCommand(
       async (): Promise<void> => {
         const deleteEventSourceMappingParams: AWS.Lambda.Types.DeleteEventSourceMappingRequest =
@@ -66,13 +66,13 @@ export class EventSourceMappingSQS {
         await lambdaClient
           .deleteEventSourceMapping(deleteEventSourceMappingParams)
           .promise();
-        Log.info(
+        log.info(
           `Event source mapping deleted, UUID=${eventSourceMappingUUID}`
         );
       },
       async (err): Promise<void | null> => {
         if (err.code === 'ResourceNotFoundException') {
-          Log.info(
+          log.info(
             `Event source mapping does not exists, UUID=${eventSourceMappingUUID}`
           );
         }
