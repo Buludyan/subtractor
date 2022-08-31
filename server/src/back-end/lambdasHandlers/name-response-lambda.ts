@@ -2,16 +2,16 @@ import {
   isNull,
   isUndefined,
   makeSureThatXIs,
-} from './../utilities/common-utils';
+} from './../../core/utilities/common-utils';
 import {Context, APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
-import * as Constants from '../project-specific-constants';
-import {KeyValueStore} from '../aws-services/dynamo-db';
+import * as Constants from '../../project-specific-constants';
+import {KeyValueStore} from '../../core/aws-services/dynamo-db';
 import {
   IVideoName,
   videoNameTypeGuard,
   newVideoName,
-} from '../project-specific-interfaces';
-import {log} from '../utilities/log';
+} from '../../project-specific-interfaces';
+import {log} from '../../core/utilities/log';
 
 export const nameLambdaHandler =
   'dist/src/lambdasHandlers/name-response-lambda.nameResponse';

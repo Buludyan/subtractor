@@ -1,4 +1,4 @@
-import {IGuard} from './utilities/common-utils';
+import {IGuard} from './core/utilities/common-utils';
 
 export const videoNameTypeGuard: `videoNameTypeGuard` = `videoNameTypeGuard`;
 

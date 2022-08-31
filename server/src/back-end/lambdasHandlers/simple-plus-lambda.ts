@@ -1,11 +1,11 @@
 import {Context, APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
-import {KeyValueStore} from './../aws-services/dynamo-db';
+import {KeyValueStore} from './../../core/aws-services/dynamo-db';
 import {
   IVideoName,
   videoNameTypeGuard,
   newVideoName,
-} from './../project-specific-interfaces';
-import {hashTovideoDynamoTableName} from './../project-specific-constants';
+} from '../../project-specific-interfaces';
+import {hashTovideoDynamoTableName} from '../../project-specific-constants';
 
 export const plusLambdaHandler = `dist/src/lambdasHandlers/simple-plus-lambda.plus`;
 

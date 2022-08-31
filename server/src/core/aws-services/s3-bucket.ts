@@ -59,8 +59,6 @@ export class S3Bucket {
     log.info(`Sending file ${fileName} to s3 bucket ${this.bucketName}`);
     return await awsCommonUtils.awsCommand(
       async (): Promise<void> => {
-        // TODO: check other parameters
-
         const fileBody = createReadStream(filePath);
         const putObjectReq: AWS.S3.PutObjectRequest = {
           Bucket: this.bucketName,

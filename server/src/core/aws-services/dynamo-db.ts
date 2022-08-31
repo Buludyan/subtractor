@@ -1,4 +1,4 @@
-import {IVideoName} from './../project-specific-interfaces';
+import {IVideoName} from './../../project-specific-interfaces';
 import {log} from './../utilities/log';
 import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';

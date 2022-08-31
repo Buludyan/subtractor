@@ -1,9 +1,9 @@
 import {nameLambdaHandler} from './lambdasHandlers/name-response-lambda';
-import {SQS} from './aws-services/sqs';
-import {S3Bucket} from './aws-services/s3-bucket';
-import {KeyValueStore} from './aws-services/dynamo-db';
+import {SQS} from './../core/aws-services/sqs';
+import {S3Bucket} from './../core/aws-services/s3-bucket';
+import {KeyValueStore} from './../core/aws-services/dynamo-db';
 import {urlToHttpOptions} from 'url';
-import * as Constants from './project-specific-constants';
+import * as Constants from '../project-specific-constants';
 import {type} from 'os';
 import {
   archiveSourceCodeAndGetPath,
@@ -11,15 +11,15 @@ import {
   throwIfNull,
   throwIfUndefined,
   TypeGuardOf,
-} from './utilities/common-utils';
+} from './../core/utilities/common-utils';
 import {
   IVideoName,
   videoNameTypeGuard,
   newVideoName,
-} from './project-specific-interfaces';
-import {ApiGateway} from './aws-services/api-gateway';
-import {log} from './utilities/log';
-import {Lambda} from './aws-services/lambda';
+} from '../project-specific-interfaces';
+import {ApiGateway} from './../core/aws-services/api-gateway';
+import {log} from './../core/utilities/log';
+import {Lambda} from './../core/aws-services/lambda';
 import {plusLambdaHandler} from './lambdasHandlers/simple-plus-lambda';
 
 log.info(`Compilation passed successfully!`);
