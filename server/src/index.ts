@@ -1,3 +1,4 @@
+import {nameLambdaHandler} from './lambdasHandlers/name-response-lambda';
 import {SQS} from './aws-services/sqs';
 import {S3Bucket} from './aws-services/s3-bucket';
 import {KeyValueStore} from './aws-services/dynamo-db';
@@ -43,7 +44,7 @@ const dynamoDbExample = async () => {
   await myTable.destroy();
 };
 
-dynamoDbExample();
+//dynamoDbExample();
 
 const lambdaDeployExample = async () => {
   const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
@@ -65,7 +66,7 @@ const lambdaDeployExample = async () => {
   await lambda.destroy();
 };
 
-const apiPlusLambdaDeployExample = async () => {
+/* const apiPlusLambdaDeployExample = async () => {
   const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
@@ -111,27 +112,44 @@ const apiPlusLambdaDeployExample = async () => {
   log.info(`Done`);
   await lambda.destroy();
   await apiGateway.destroy();
+}; */
+
+const createApiLabmdaDynamo = async () => {
+  const s3Bucket: S3Bucket = new S3Bucket(Constants.lambdaZipFileS3BucketName);
+  await s3Bucket.construct();
+  const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
+  await s3Bucket.sendFile(
+    lambdaZipFilePath,
+    lambdaZipFilePath,
+    'application/zip'
+  );
+
+  const lambda: Lambda = new Lambda(
+    `my-custom-lambda`,
+    Constants.lambdaZipFileS3BucketName,
+    lambdaZipFilePath,
+    nameLambdaHandler
+  );
+  await lambda.construct();
+  const lambdaArn = await lambda.getArn();
+  throwIfNull(lambdaArn);
+
+  const apiGateway = new ApiGateway('subtractor');
+  await apiGateway.construct();
+  await apiGateway.createNewResource('upload', lambdaArn, 'POST');
+  const apiUrl = await apiGateway.createDeployment();
+
+  const myTable = new KeyValueStore<IVideoName>(
+    Constants.hashTovideoDynamoTableName,
+    videoNameTypeGuard
+  );
+  await myTable.construct();
+
+  console.log(apiUrl);
+  await sleep(600000);
+  await lambda.destroy();
+  await apiGateway.destroy();
+  await myTable.destroy();
 };
 
-const f = () => {
-  log.throw('Exception');
-};
-
-const g = () => {
-  try {
-    f();
-  } catch (err) {
-    log.rethrow('Rethrowing...', err);
-  }
-};
-
-const h = () => {
-  g();
-};
-
-const main = async () => {
-  // await apiPlusLambdaDeployExample();
-  h();
-};
-
-main().catch(err => log.error(`Something bad happened: ${err}`));
+createApiLabmdaDynamo();
