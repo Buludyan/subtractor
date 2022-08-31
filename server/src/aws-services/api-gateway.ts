@@ -266,7 +266,7 @@ export class ApiGateway {
           restApiId: resource.restApiId,
           resourceId: resource.id,
           integrationHttpMethod: httpMethod,
-          type: 'AWS',
+          type: 'AWS_PROXY',
           uri: uri,
         };
         await apiGatewayClient.putIntegration(putIntegrationReq).promise();

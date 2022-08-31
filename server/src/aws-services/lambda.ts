@@ -46,7 +46,7 @@ export class Lambda {
           Publish: true,
           Role: 'arn:aws:iam::642813027215:role/AwsLambdaLevon',
           Runtime: 'nodejs16.x',
-          Timeout: 1,
+          Timeout: 10,
         };
         await lambdaClient.createFunction(createFunctionRequest).promise();
         log.info(`Lambda ${this.functionName} constructed`);
