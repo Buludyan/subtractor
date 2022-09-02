@@ -6,14 +6,18 @@ import './VideoRecord.scss';
 //import { uploadFile } from 'react-s3';
 import AWS from 'aws-sdk';
 
-const s3Config = {
-  bucketName:  'videostorehash',
-  region: 'eu-central-1',
+if(!process.env.REACT_APP_AWS_ACCESS_KEY || !process.env.REACT_APP_AWS_SECRET_KEY) {
+
+  throw new Error('specify amazon access keys before start');
 }
 
 const myBucket = new AWS.S3({
-  params: { Bucket: s3Config.bucketName},
-  region: s3Config.region,
+  params: { Bucket: 'videostorehash'},
+  region: 'eu-central-1',
+  credentials: {
+    accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
+    secretAccessKey: process.env.REACT_APP_AWS_SECRET_KEY
+  }
 })
 
 export const VideoRecord = () => {
@@ -29,7 +33,6 @@ const startRecording = async () => {
           video: true,
           audio: true,
         })
-
       
   const recorder: RecordRTCPromisesHandler = new RecordRTCPromisesHandler(stream, {
     type: 'video',
@@ -58,11 +61,12 @@ const uploadVideo = async () => {
     const params = {
       ACL: 'public-read',
       Body: mp4File,
-      Bucket: s3Config.bucketName,
+      Bucket: 'videostorehash',
       Key: mp4File.name
     };
 
     try {
+
       myBucket.putObject(params)
       .on('httpUploadProgress', (evt) => {
           setProgress(Math.round((evt.loaded / evt.total) * 100))
@@ -78,7 +82,6 @@ const uploadVideo = async () => {
   }
   setVideoUrlBlob(null);
 }
-
   return (
     <div>
       <button onClick={startRecording}>Start Recording</button>
