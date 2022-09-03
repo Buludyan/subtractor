@@ -1,0 +1,35 @@
+{
+  "name": "interfaces",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/src/index.js",
+  "type": "commonjs",
+  "directories": {
+    "lib": "dist"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
+    "eslint": "^8.23.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-promise": "^6.0.1",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.7.1",
+    "tslint": "^6.1.3",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "coreCompile": "tsc --project tsconfig.json",
+    "nodemon": "nodemon --watch src --ext ts --exec \"npm run coreCompile\""
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "gts": "^3.1.0"
+  }
+}
