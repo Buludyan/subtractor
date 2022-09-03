@@ -3,7 +3,7 @@ export namespace InterfacesProjectSpecificInterfaces {
     _guard: TypeGuard;
   }
 
-  export const videoNameTypeGuard: `videoNameTypeGuard` = `videoNameTypeGuard`;
+  export const videoNameTypeGuard: 'videoNameTypeGuard' = 'videoNameTypeGuard';
 
   export interface IVideoName extends IGuard<typeof videoNameTypeGuard> {
     videoName: string;
