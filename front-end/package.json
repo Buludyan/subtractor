@@ -28,6 +28,7 @@
     "stream-browserify": "^3.0.0",
     "typescript": "^4.8.2",
     "web-vitals": "^2.1.4",
+    "gts": "^3.1.0",
     "interfaces": "file:../interfaces"
   },
   "scripts": {
@@ -56,6 +57,15 @@
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.5",
-    "@types/recordrtc": "^5.6.8"
+    "@types/recordrtc": "^5.6.8",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
+    "eslint": "^8.23.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-promise": "^6.0.1",
+    "prettier": "^2.7.1",
+    "tslint": "^6.1.3"
   }
 }
