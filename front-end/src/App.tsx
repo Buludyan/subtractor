@@ -1,6 +1,7 @@
-import './App.css';
 import {VideoRecord} from './Components/VideoRecord/VideoRecord';
 import {VideoStream} from './Components/VideoStream/VideoStream';
+
+import './App.css';
 
 function App() {
   return (

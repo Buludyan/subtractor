@@ -1,9 +1,12 @@
 import {useState} from 'react';
-import {RecordRTCPromisesHandler} from 'recordrtc';
-import './VideoRecord.scss';
-//import { uploadFile } from 'react-s3';
+
 import AWS from 'aws-sdk';
+import {saveAs} from 'file-saver';
+import fixWebmDuration from 'webm-duration-fix';
+import {RecordRTCPromisesHandler} from 'recordrtc';
 import {InterfacesProjectSpecificInterfaces} from 'interfaces';
+
+import './VideoRecord.scss';
 
 if (
   !process.env.REACT_APP_AWS_ACCESS_KEY ||
@@ -50,7 +53,8 @@ export const VideoRecord = () => {
     if (recorder) {
       await recorder.stopRecording();
       const blob: Blob = await recorder.getBlob();
-      setVideoUrlBlob(blob);
+      const newBlob = await fixWebmDuration(blob);
+      setVideoUrlBlob(newBlob);
       setRecorder(null);
     }
   };
@@ -59,7 +63,8 @@ export const VideoRecord = () => {
     if (videoBlob) {
       const variable = InterfacesProjectSpecificInterfaces.videoNameTypeGuard;
       console.log(variable);
-      const mp4File = new File([videoBlob], 'video.mp4', {type: 'video/mp4'});
+      const mp4File = new File([videoBlob], 'test.mp4', {type: 'video/mp4'});
+      console.log(mp4File);
 
       const params = {
         ACL: 'public-read',
@@ -85,10 +90,11 @@ export const VideoRecord = () => {
       } catch (exception) {
         console.log(exception);
       }
-      //saveAs(mp4File, `Video-${Date.now()}.mp4`);
+      saveAs(mp4File, `Video-${Date.now()}.mp4`);
     }
     setVideoUrlBlob(null);
   };
+
   return (
     <div>
       <button onClick={startRecording}>Start Recording</button>

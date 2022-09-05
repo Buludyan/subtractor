@@ -16,6 +16,8 @@
     "constants-browserify": "^1.0.0",
     "core": "file:../core",
     "file-saver": "^2.0.5",
+    "gts": "^3.1.0",
+    "interfaces": "file:../interfaces",
     "node-sass": "^7.0.1",
     "os-browserify": "^0.3.0",
     "path": "^0.12.7",
@@ -26,10 +28,10 @@
     "recordrtc": "^5.6.2",
     "stream": "^0.0.2",
     "stream-browserify": "^3.0.0",
+    "ts-ebml": "^2.0.2",
     "typescript": "^4.8.2",
     "web-vitals": "^2.1.4",
-    "gts": "^3.1.0",
-    "interfaces": "file:../interfaces"
+    "webm-duration-fix": "^1.0.4"
   },
   "scripts": {
     "start": "react-scripts start",

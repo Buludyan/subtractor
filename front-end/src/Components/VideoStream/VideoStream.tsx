@@ -1,4 +1,5 @@
 import {useEffect, useRef} from 'react';
+
 import './VideoStream.scss';
 
 export const VideoStream = () => {
