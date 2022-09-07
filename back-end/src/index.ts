@@ -1,3 +1,4 @@
+import {BackEndTranscribeInvokeLambda} from './lambdasHandlers/transcribe-invoke-lambda';
 import {BackEndNameResponseLambda} from './lambdasHandlers/name-response-lambda';
 import {CoreS3Bucket} from 'core';
 import {CoreDynamoDb} from 'core';
@@ -13,6 +14,7 @@ import sleep = CoreCommonUtils.sleep;
 import archiveSourceCodeAndGetPath = CoreCommonUtils.archiveSourceCodeAndGetPath;
 import throwIfNull = CoreCommonUtils.throwIfNull;
 import nameLambdaHandler = BackEndNameResponseLambda.nameLambdaHandler;
+import transcribeLambdaHandler = BackEndTranscribeInvokeLambda.transcribeLambdaHandler;
 import log = CoreLog.log;
 import KeyValueStore = CoreDynamoDb.KeyValueStore;
 import IVideoName = InterfacesProjectSpecificInterfaces.IVideoName;
@@ -20,6 +22,7 @@ import videoNameTypeGuard = InterfacesProjectSpecificInterfaces.videoNameTypeGua
 import newVideoName = InterfacesProjectSpecificInterfaces.newVideoName;
 import hashTovideoDynamoTableName = InterfacesProjectSpecificConstants.hashTovideoDynamoTableName;
 import lambdaZipFileS3BucketName = InterfacesProjectSpecificConstants.lambdaZipFileS3BucketName;
+import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
 import S3Bucket = CoreS3Bucket.S3Bucket;
 import Lambda = CoreLambda.Lambda;
 import plusLambdaHandler = BackEndSimplePlusLambda.plusLambdaHandler;
@@ -155,4 +158,42 @@ const createApiLabmdaDynamo = async () => {
   await myTable.destroy();
 };
 
-createApiLabmdaDynamo();
+//createApiLabmdaDynamo();
+
+const transcribeInvoker = async () => {
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+  await s3Bucket.construct();
+  const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
+  await s3Bucket.sendFile(
+    lambdaZipFilePath,
+    lambdaZipFilePath,
+    'application/zip'
+  );
+
+  const transcribeOutputBucket: S3Bucket = new S3Bucket(
+    transcribeOutputBucketName
+  );
+  await transcribeOutputBucket.construct();
+
+  const lambda: Lambda = new Lambda(
+    `my-custom-lambda`,
+    lambdaZipFileS3BucketName,
+    lambdaZipFilePath,
+    transcribeLambdaHandler
+  );
+  await lambda.construct();
+  const lambdaArn = await lambda.getArn();
+  throwIfNull(lambdaArn);
+
+  const apiGateway = new ApiGateway('subtractor');
+  await apiGateway.construct();
+  await apiGateway.createNewResource('process', lambdaArn, 'POST');
+  const apiUrl = await apiGateway.createDeployment();
+
+  console.log(apiUrl);
+  await sleep(600000);
+  await lambda.destroy();
+  await apiGateway.destroy();
+  await transcribeOutputBucket.destroy();
+};
+transcribeInvoker();

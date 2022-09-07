@@ -15,4 +15,19 @@ export namespace InterfacesProjectSpecificInterfaces {
       videoName: videoName,
     };
   };
+
+  export const videoHashNameTypeGuard: 'videoHashNameTypeGuard' =
+    'videoHashNameTypeGuard';
+
+  export interface IVideoHashName
+    extends IGuard<typeof videoHashNameTypeGuard> {
+    videoHashName: string;
+  }
+
+  export const newVideoHashName = (videoHashName: string): IVideoHashName => {
+    return {
+      _guard: videoHashNameTypeGuard,
+      videoHashName,
+    };
+  };
 }

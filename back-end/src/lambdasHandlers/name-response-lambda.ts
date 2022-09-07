@@ -1,5 +1,5 @@
 import {CoreCommonUtils} from 'core';
-import {Context, APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
+import {APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
 import {CoreDynamoDb} from 'core';
 import {InterfacesProjectSpecificInterfaces} from 'interfaces';
 import {InterfacesProjectSpecificConstants} from 'interfaces';
@@ -19,8 +19,8 @@ export namespace BackEndNameResponseLambda {
     'dist/src/lambdasHandlers/name-response-lambda.nameResponse';
 
   export const nameResponse = async (
-    event: APIGatewayEvent,
-    context: Context
+    event: APIGatewayEvent
+    //context: Context
   ): Promise<APIGatewayProxyResult> => {
     try {
       if (isNull(event.body)) {
