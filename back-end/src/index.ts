@@ -65,7 +65,8 @@ const lambdaDeployExample = async () => {
     `my-custom-lambda`,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    plusLambdaHandler
+    plusLambdaHandler,
+    10
   );
   await lambda.construct();
   await sleep(60000);
@@ -134,7 +135,8 @@ const createApiLabmdaDynamo = async () => {
     `my-custom-lambda`,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    nameLambdaHandler
+    nameLambdaHandler,
+    10
   );
   await lambda.construct();
   const lambdaArn = await lambda.getArn();
@@ -179,7 +181,8 @@ const transcribeInvoker = async () => {
     `my-custom-lambda`,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    transcribeLambdaHandler
+    transcribeLambdaHandler,
+    60
   );
   await lambda.construct();
   const lambdaArn = await lambda.getArn();
