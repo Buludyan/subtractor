@@ -31,10 +31,9 @@
   },
   "scripts": {
     "tscb": "tsc -b",
-    "backendCompile": "tsc --project tsconfig.json",
-    "backendCompileAndRun": "npm run backendCompile && node dist/src/index.js",
-    "frontEndRun": "npm start frontEndRun",
-    "nodemon": "nodemon --watch src --ext ts --exec \"npm run backendCompileAndRun\""
+    "compile": "tsc --project tsconfig.json",
+    "compileAndRun": "npm run compile && node dist/src/index.js",
+    "nodemon": "nodemon --watch src --ext ts --exec \"npm run compileAndRun\""
   },
   "author": "",
   "license": "ISC",
@@ -42,12 +41,12 @@
     "archiver": "^5.3.1",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1132.0",
+    "core": "file:../core/core-1.0.0.tgz",
     "fix-esm": "^1.0.1",
     "gts": "^3.1.0",
+    "interfaces": "file:../interfaces/interfaces-1.0.0.tgz",
     "source-map-support": "^0.5.21",
     "stack-trace": "^1.0.0-pre1",
-    "tslog": "^3.3.4",
-    "core": "file:../core",
-    "interfaces": "file:../interfaces"
+    "tslog": "^3.3.4"
   }
 }
