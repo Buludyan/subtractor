@@ -17,7 +17,7 @@ export namespace BackEndTranscribeInvokeLambda {
   import log = CoreLog.log;
 
   export const transcribeLambdaHandler =
-    'dist/src/lambdasHandlers/transcribe-invoke-lambda.transcribeInvoke';
+    'dist/src/lambdasHandlers/transcribe-invoke-lambda.BackEndTranscribeInvokeLambda.transcribeInvoke';
 
   export const transcribeInvoke = async (
     event: APIGatewayEvent

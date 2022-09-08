@@ -28,7 +28,7 @@ export namespace CoreTranscribe {
               },
               LanguageCode: 'en-US',
               // TODO: extract this parameter
-              MediaFormat: 'mp4',
+              // MediaFormat: 'mp4',
               // TODO: extract this parameter
               OutputBucketName: this.transcribeOutputBucketName,
               Subtitles: {

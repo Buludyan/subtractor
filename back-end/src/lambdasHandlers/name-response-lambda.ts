@@ -16,7 +16,7 @@ export namespace BackEndNameResponseLambda {
   import log = CoreLog.log;
 
   export const nameLambdaHandler =
-    'dist/src/lambdasHandlers/name-response-lambda.nameResponse';
+    'dist/src/lambdasHandlers/name-response-lambda.BackEndTranscribeInvokeLambda.nameResponse';
 
   export const nameResponse = async (
     event: APIGatewayEvent

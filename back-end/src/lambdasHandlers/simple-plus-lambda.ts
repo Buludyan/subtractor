@@ -1,7 +1,7 @@
 import {Context, APIGatewayProxyResult, APIGatewayEvent} from 'aws-lambda';
 
 export namespace BackEndSimplePlusLambda {
-  export const plusLambdaHandler = `dist/src/lambdasHandlers/simple-plus-lambda.plus`;
+  export const plusLambdaHandler = `dist/src/lambdasHandlers/simple-plus-lambda.BackEndSimplePlusLambda.plus`;
 
   export const plus = async (
     event: APIGatewayEvent,
