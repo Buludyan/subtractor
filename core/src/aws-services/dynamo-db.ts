@@ -3,6 +3,7 @@ import {AWSError} from 'aws-sdk/lib/error';
 import * as AWS from 'aws-sdk';
 import {CoreAwsCommonUtils} from './aws-common-utils';
 import {CoreCommonUtils} from '../utilities/common-utils';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreDynamoDb {
   import TypeGuardOf = CoreCommonUtils.TypeGuardOf;
@@ -11,6 +12,7 @@ export namespace CoreDynamoDb {
   import makeSureThatXIs = CoreCommonUtils.makeSureThatXIs;
   import awsCommand = CoreAwsCommonUtils.awsCommand;
   import log = CoreLog.log;
+  import AwsService = CoreAwsService.AwsService;
 
   const dynamoClient: AWS.DynamoDB = new AWS.DynamoDB({
     apiVersion: '2012-08-10',
@@ -23,9 +25,9 @@ export namespace CoreDynamoDb {
       region: 'eu-central-1',
     });
 
-  export class KeyValueStore<
-    RecordType extends IGuard<TypeGuardOf<RecordType>>
-  > {
+  export class KeyValueStore<RecordType extends IGuard<TypeGuardOf<RecordType>>>
+    implements AwsService
+  {
     constructor(
       private tableName: string,
       private typeGuard: TypeGuardOf<RecordType>

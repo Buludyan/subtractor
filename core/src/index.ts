@@ -1,3 +1,4 @@
+export * from './aws-services/aws-service';
 export * from './aws-services/api-gateway';
 export * from './aws-services/aws-common-utils';
 export * from './aws-services/cloud-watch';

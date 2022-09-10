@@ -1,17 +1,19 @@
 import * as AWS from 'aws-sdk';
 import {CoreLog} from '../utilities/log';
 import {CoreAwsCommonUtils} from './aws-common-utils';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreTranscribe {
   import awsCommand = CoreAwsCommonUtils.awsCommand;
   import log = CoreLog.log;
+  import AwsService = CoreAwsService.AwsService;
 
   const transcribeClient: AWS.TranscribeService = new AWS.TranscribeService({
     apiVersion: '2017-10-26',
     region: 'eu-central-1',
   });
 
-  export class Transcribe {
+  export class Transcribe implements AwsService {
     constructor(
       private videoHashName: string,
       private videoStoreHash: string,

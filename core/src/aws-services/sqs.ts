@@ -3,6 +3,7 @@ import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import {CoreCommonUtils} from '../utilities/common-utils';
 import {CoreAwsCommonUtils} from './aws-common-utils';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreSqs {
   import sleep = CoreCommonUtils.sleep;
@@ -16,13 +17,14 @@ export namespace CoreSqs {
   import isUndefined = CoreCommonUtils.isUndefined;
   import awsCommand = CoreAwsCommonUtils.awsCommand;
   import log = CoreLog.log;
+  import AwsService = CoreAwsService.AwsService;
 
   const sqsClient: AWS.SQS = new AWS.SQS({
     apiVersion: '2012-11-05',
     region: 'eu-central-1',
   });
 
-  export class SQS {
+  export class SQS implements AwsService {
     private queueUrl: string | null = null;
     constructor(private queueName: string) {}
     readonly construct = async () => {

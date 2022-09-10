@@ -4,6 +4,7 @@ import {BackEndVideoDownloadLambda} from './lambdasHandlers/video-download-lambd
 import {CoreS3Bucket} from 'core';
 import {CoreDynamoDb} from 'core';
 import {CoreCommonUtils} from 'core';
+import {CoreAwsService} from 'core';
 import {
   InterfacesProjectSpecificInterfaces,
   InterfacesProjectSpecificConstants,
@@ -32,6 +33,7 @@ import S3Bucket = CoreS3Bucket.S3Bucket;
 import Lambda = CoreLambda.Lambda;
 import plusLambdaHandler = BackEndSimplePlusLambda.plusLambdaHandler;
 import ApiGateway = CoreApiGateway.ApiGateway;
+import AwsService = CoreAwsService.AwsService;
 
 log.info(`Compilation passed successfully!`);
 
@@ -58,13 +60,14 @@ const dynamoDbExample = async () => {
 //dynamoDbExample();
 
 const lambdaDeployExample = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
     lambdaZipFilePath,
     lambdaZipFilePath,
-    'application/zip'
+    'application/zip',
+    false
   );
   const lambda: Lambda = new Lambda(
     `my-custom-lambda`,
@@ -127,16 +130,17 @@ const lambdaDeployExample = async () => {
 }; */
 
 const createApiLabmdaDynamo = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
     lambdaZipFilePath,
     lambdaZipFilePath,
-    'application/zip'
+    'application/zip',
+    false
   );
 
-  const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHash, false);
+  const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHash);
   await videoStoreHashBucket.construct();
 
   const lambda: Lambda = new Lambda(
@@ -171,13 +175,14 @@ const createApiLabmdaDynamo = async () => {
 //createApiLabmdaDynamo();
 
 const transcribeInvoker = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
     lambdaZipFilePath,
     lambdaZipFilePath,
-    'application/zip'
+    'application/zip',
+    false
   );
 
   /*  const transcribeOutputBucket: S3Bucket = new S3Bucket(
@@ -211,13 +216,14 @@ const transcribeInvoker = async () => {
 //transcribeInvoker();
 
 const videoDownloader = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
     lambdaZipFilePath,
     lambdaZipFilePath,
-    'application/zip'
+    'application/zip',
+    false
   );
 
   const lambda: Lambda = new Lambda(
@@ -242,4 +248,23 @@ const videoDownloader = async () => {
   await apiGateway.destroy();
 };
 
-videoDownloader();
+// const initiate = async () => {
+//   const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+//   await s3Bucket.construct();
+// };
+
+// const demolish = async () => {
+//   const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+//   await s3Bucket.destroy();
+// };
+
+const main = async () => {
+  await videoDownloader();
+
+  // await demolish();
+  // await initiate();
+  // await sleep(100000);
+  // await demolish();
+};
+
+main().catch(err => log.error(`Something bad happened: ${err}`));

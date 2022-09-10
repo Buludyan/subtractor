@@ -3,18 +3,20 @@ import * as AWS from 'aws-sdk';
 import {AWSError} from 'aws-sdk/lib/error';
 import {CoreAwsCommonUtils} from './aws-common-utils';
 import {createReadStream} from 'fs';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreS3Bucket {
   import awsCommand = CoreAwsCommonUtils.awsCommand;
   import log = CoreLog.log;
+  import AwsService = CoreAwsService.AwsService;
 
   const s3Client: AWS.S3 = new AWS.S3({
     apiVersion: '2006-03-01',
     region: 'eu-central-1',
   });
 
-  export class S3Bucket {
-    constructor(private bucketName: string, private publicRead: boolean) {}
+  export class S3Bucket implements AwsService {
+    constructor(private bucketName: string) {}
 
     readonly construct = async () => {
       log.info(`Constructing S3 bucket ${this.bucketName}`);
@@ -22,7 +24,6 @@ export namespace CoreS3Bucket {
         async (): Promise<void> => {
           const createBucketRequest: AWS.S3.CreateBucketRequest = {
             Bucket: this.bucketName,
-            ACL: this.publicRead ? 'public-read' : 'authenticated-read',
           };
 
           await s3Client.createBucket(createBucketRequest).promise();
@@ -62,7 +63,8 @@ export namespace CoreS3Bucket {
     readonly sendFile = async (
       fileName: string,
       filePath: string,
-      contentType: string
+      contentType: string,
+      publicAccess: boolean
     ): Promise<void> => {
       log.info(`Sending file ${fileName} to s3 bucket ${this.bucketName}`);
       return await awsCommand(
@@ -73,6 +75,7 @@ export namespace CoreS3Bucket {
             Key: fileName,
             Body: fileBody,
             ContentType: contentType,
+            ACL: publicAccess ? 'public-read' : 'bucket-owner-full-control',
           };
           await s3Client.putObject(putObjectReq).promise();
 
@@ -83,6 +86,31 @@ export namespace CoreS3Bucket {
         }
       );
     };
+
+    readonly setAclToFile = async (
+      fileName: string,
+      publicAccess: boolean
+    ): Promise<void> => {
+      log.info(
+        `Setting file ${fileName} ACL permissions, publicAccess=${publicAccess}`
+      );
+      return await awsCommand(
+        async (): Promise<void> => {
+          const putObjectReq: AWS.S3.PutObjectAclRequest = {
+            Bucket: this.bucketName,
+            Key: fileName,
+            ACL: publicAccess ? 'public-read' : 'bucket-owner-full-control',
+          };
+          await s3Client.putObjectAcl(putObjectReq).promise();
+
+          log.info(`File ${fileName} permissions set`);
+        },
+        async (): Promise<void | null> => {
+          return null;
+        }
+      );
+    };
+
     readonly getFile = async (
       fileName: string,
       changeNameTo: string
@@ -106,6 +134,27 @@ export namespace CoreS3Bucket {
         }
       );
     };
+
+    readonly isFilePresent = async (fileName: string): Promise<boolean> => {
+      log.info(`Asking s3 for file ${this.bucketName}/${fileName} presence`);
+      return await awsCommand(
+        async (): Promise<boolean> => {
+          const getObjectReq: AWS.S3.GetObjectRequest = {
+            Bucket: this.bucketName,
+            Key: fileName,
+          };
+          const response = await s3Client.getObject(getObjectReq).promise();
+          log.info(`File ${fileName} got from S3 bucket ${this.bucketName}`);
+          // TODO: refine this
+          return true;
+        },
+        async (): Promise<boolean | null> => {
+          // TODO: what if file is not found?
+          return null;
+        }
+      );
+    };
+
     readonly getSignedURL = async (
       fileName: string,
       changeNameTo: string
@@ -127,6 +176,7 @@ export namespace CoreS3Bucket {
         }
       );
     };
+
     readonly getArn = async (): Promise<string> => {
       return `arn:aws:s3:::${this.bucketName}`;
     };

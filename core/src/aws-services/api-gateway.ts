@@ -2,6 +2,7 @@ import * as AWS from 'aws-sdk';
 import {CoreCommonUtils} from '../utilities/common-utils';
 import {CoreLog} from '../utilities/log';
 import {CoreAwsCommonUtils} from './aws-common-utils';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreApiGateway {
   import throwIfNull = CoreCommonUtils.throwIfNull;
@@ -11,6 +12,7 @@ export namespace CoreApiGateway {
   import isUndefined = CoreCommonUtils.isUndefined;
   import log = CoreLog.log;
   import awsCommand = CoreAwsCommonUtils.awsCommand;
+  import AwsService = CoreAwsService.AwsService;
 
   const awsRegion = 'eu-central-1';
   const apiGatewayClient: AWS.APIGateway = new AWS.APIGateway({
@@ -25,7 +27,7 @@ export namespace CoreApiGateway {
     restApiId: string;
   }
 
-  export class ApiGateway {
+  export class ApiGateway implements AwsService {
     id: string | null = null;
     constructor(private apiName: string) {}
 

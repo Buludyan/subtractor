@@ -2,6 +2,7 @@ import * as AWS from 'aws-sdk';
 import {CoreCommonUtils} from '../../utilities/common-utils';
 import {CoreLog} from '../../utilities/log';
 import {CoreAwsCommonUtils} from '../aws-common-utils';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreEventSourceMappingSqs {
   import throwIfNull = CoreCommonUtils.throwIfNull;
@@ -9,13 +10,14 @@ export namespace CoreEventSourceMappingSqs {
   import isNull = CoreCommonUtils.isNull;
   import log = CoreLog.log;
   import awsCommand = CoreAwsCommonUtils.awsCommand;
+  import AwsService = CoreAwsService.AwsService;
 
   const lambdaClient: AWS.Lambda = new AWS.Lambda({
     apiVersion: '2015-03-31',
     region: 'eu-central-1',
   });
 
-  export class EventSourceMappingSQS {
+  export class EventSourceMappingSQS implements AwsService {
     uuid: string | null = null;
     constructor(private queueARN: string, private lambdaName: string) {}
     readonly construct = async () => {

@@ -28,7 +28,6 @@ export namespace BackEndVideoDownloadLambda {
 
   export const videoDownloader = async (
     event: APIGatewayEvent
-    //context: Context
   ): Promise<APIGatewayProxyResult> => {
     try {
       if (isNull(event.body)) {
@@ -50,12 +49,22 @@ export namespace BackEndVideoDownloadLambda {
       const originalName = await videoNameTable.getRecord(body.videoHashName);
 
       const transcribeOutputBucket: S3Bucket = new S3Bucket(
-        transcribeOutputBucketName,
-        true
+        transcribeOutputBucketName
       );
+      const subtitleHashName = body.videoHashName + '.srt';
+      if (!transcribeOutputBucket.isFilePresent(subtitleHashName)) {
+        return {
+          statusCode: 404,
+          body: 'Requested file not found',
+        };
+      }
+
+      await transcribeOutputBucket.setAclToFile(subtitleHashName, true);
+
+      const subtitleName = originalName.videoName + '.srt';
       const videoFileURL = await transcribeOutputBucket.getSignedURL(
-        body.videoHashName,
-        originalName.videoName
+        subtitleHashName,
+        subtitleName
       );
 
       if (isNull(videoFileURL)) {

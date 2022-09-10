@@ -2,19 +2,21 @@ import * as AWS from 'aws-sdk';
 import {CoreAwsCommonUtils} from './aws-common-utils';
 import {CoreCommonUtils} from '../utilities/common-utils';
 import {CoreLog} from '../utilities/log';
+import {CoreAwsService} from './aws-service';
 
 export namespace CoreLambda {
   import throwIfNull = CoreCommonUtils.throwIfNull;
   import throwIfUndefined = CoreCommonUtils.throwIfUndefined;
   import awsCommand = CoreAwsCommonUtils.awsCommand;
   import log = CoreLog.log;
+  import AwsService = CoreAwsService.AwsService;
 
   const lambdaClient: AWS.Lambda = new AWS.Lambda({
     apiVersion: '2015-03-31',
     region: 'eu-central-1',
   });
 
-  export class Lambda {
+  export class Lambda implements AwsService {
     constructor(
       private functionName: string,
       private s3BucketName: string,
