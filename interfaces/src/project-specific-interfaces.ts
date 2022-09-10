@@ -30,4 +30,17 @@ export namespace InterfacesProjectSpecificInterfaces {
       videoHashName,
     };
   };
+
+  export const videoURLTypeGuard: 'videoURLTypeGuard' = 'videoURLTypeGuard';
+
+  export interface IVideoURL extends IGuard<typeof videoURLTypeGuard> {
+    videoURL: string;
+  }
+
+  export const newVideoURL = (videoURL: string): IVideoURL => {
+    return {
+      _guard: videoURLTypeGuard,
+      videoURL,
+    };
+  };
 }

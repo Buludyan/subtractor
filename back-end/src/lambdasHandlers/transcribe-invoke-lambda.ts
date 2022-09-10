@@ -14,6 +14,7 @@ export namespace BackEndTranscribeInvokeLambda {
   import IVideoHashName = InterfacesProjectSpecificInterfaces.IVideoHashName;
   import videoHashNameTypeGuard = InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard;
   import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
+  import videoStoreHash = InterfacesProjectSpecificConstants.videoStoreHash;
   import log = CoreLog.log;
 
   export const transcribeLambdaHandler =
@@ -34,6 +35,7 @@ export namespace BackEndTranscribeInvokeLambda {
       makeSureThatXIs<IVideoHashName>(body, videoHashNameTypeGuard);
       const newJob = new Transcribe(
         body.videoHashName,
+        videoStoreHash,
         transcribeOutputBucketName
       );
 

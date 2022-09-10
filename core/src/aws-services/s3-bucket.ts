@@ -14,14 +14,18 @@ export namespace CoreS3Bucket {
   });
 
   export class S3Bucket {
-    constructor(private bucketName: string) {}
+    constructor(private bucketName: string, private publicRead: boolean) {}
 
     readonly construct = async () => {
       log.info(`Constructing S3 bucket ${this.bucketName}`);
       return await awsCommand(
         async (): Promise<void> => {
-          // TODO: check other parameters
-          await s3Client.createBucket({Bucket: this.bucketName}).promise();
+          const createBucketRequest: AWS.S3.CreateBucketRequest = {
+            Bucket: this.bucketName,
+            ACL: this.publicRead ? 'public-read' : 'authenticated-read',
+          };
+
+          await s3Client.createBucket(createBucketRequest).promise();
           log.info(`S3 bucket constructed ${this.bucketName}`);
         },
         async (err: AWSError): Promise<void | null> => {
@@ -79,7 +83,10 @@ export namespace CoreS3Bucket {
         }
       );
     };
-    readonly getFile = async (fileName: string): Promise<string | null> => {
+    readonly getFile = async (
+      fileName: string,
+      changeNameTo: string
+    ): Promise<string | null> => {
       log.info(`Getting file ${fileName} from S3 bucket ${this.bucketName}`);
       return await awsCommand(
         async (): Promise<string> => {
@@ -87,11 +94,33 @@ export namespace CoreS3Bucket {
           const getObjectReq: AWS.S3.GetObjectRequest = {
             Bucket: this.bucketName,
             Key: fileName,
+            ResponseContentDisposition: `attachment; filename=${changeNameTo}`,
           };
           const response = await s3Client.getObject(getObjectReq).promise();
           log.info(`File ${fileName} got from S3 bucket ${this.bucketName}`);
           // TODO: refine this
           return response.Body as string;
+        },
+        async (): Promise<string | null> => {
+          return null;
+        }
+      );
+    };
+    readonly getSignedURL = async (
+      fileName: string,
+      changeNameTo: string
+    ): Promise<string | null> => {
+      log.info(`Getting file ${fileName} from S3 bucket ${this.bucketName}`);
+      return await awsCommand(
+        async (): Promise<string> => {
+          const getObjectReq: AWS.S3.GetObjectRequest = {
+            Bucket: this.bucketName,
+            Key: fileName,
+            ResponseContentDisposition: `attachment; filename=${changeNameTo}`,
+          };
+          const url = await s3Client.getSignedUrl('getObject', getObjectReq);
+          log.info(`File ${fileName} S3 URL is ${url}`);
+          return url;
         },
         async (): Promise<string | null> => {
           return null;

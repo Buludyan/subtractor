@@ -1,10 +1,13 @@
 import {BackEndTranscribeInvokeLambda} from './lambdasHandlers/transcribe-invoke-lambda';
 import {BackEndNameResponseLambda} from './lambdasHandlers/name-response-lambda';
+import {BackEndVideoDownloadLambda} from './lambdasHandlers/video-download-lambda';
 import {CoreS3Bucket} from 'core';
 import {CoreDynamoDb} from 'core';
 import {CoreCommonUtils} from 'core';
-import {InterfacesProjectSpecificInterfaces} from 'interfaces';
-import {InterfacesProjectSpecificConstants} from 'interfaces';
+import {
+  InterfacesProjectSpecificInterfaces,
+  InterfacesProjectSpecificConstants,
+} from 'interfaces';
 import {CoreApiGateway} from 'core';
 import {CoreLog} from 'core';
 import {CoreLambda} from 'core';
@@ -15,6 +18,7 @@ import archiveSourceCodeAndGetPath = CoreCommonUtils.archiveSourceCodeAndGetPath
 import throwIfNull = CoreCommonUtils.throwIfNull;
 import nameLambdaHandler = BackEndNameResponseLambda.nameLambdaHandler;
 import transcribeLambdaHandler = BackEndTranscribeInvokeLambda.transcribeLambdaHandler;
+import videoDownloadLambdaHandler = BackEndVideoDownloadLambda.videoDownloadLambdaHandler;
 import log = CoreLog.log;
 import KeyValueStore = CoreDynamoDb.KeyValueStore;
 import IVideoName = InterfacesProjectSpecificInterfaces.IVideoName;
@@ -23,6 +27,7 @@ import newVideoName = InterfacesProjectSpecificInterfaces.newVideoName;
 import hashTovideoDynamoTableName = InterfacesProjectSpecificConstants.hashTovideoDynamoTableName;
 import lambdaZipFileS3BucketName = InterfacesProjectSpecificConstants.lambdaZipFileS3BucketName;
 import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
+import videoStoreHash = InterfacesProjectSpecificConstants.videoStoreHash;
 import S3Bucket = CoreS3Bucket.S3Bucket;
 import Lambda = CoreLambda.Lambda;
 import plusLambdaHandler = BackEndSimplePlusLambda.plusLambdaHandler;
@@ -53,7 +58,7 @@ const dynamoDbExample = async () => {
 //dynamoDbExample();
 
 const lambdaDeployExample = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
@@ -122,7 +127,7 @@ const lambdaDeployExample = async () => {
 }; */
 
 const createApiLabmdaDynamo = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
@@ -130,6 +135,9 @@ const createApiLabmdaDynamo = async () => {
     lambdaZipFilePath,
     'application/zip'
   );
+
+  const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHash, false);
+  await videoStoreHashBucket.construct();
 
   const lambda: Lambda = new Lambda(
     `my-custom-lambda`,
@@ -163,7 +171,7 @@ const createApiLabmdaDynamo = async () => {
 //createApiLabmdaDynamo();
 
 const transcribeInvoker = async () => {
-  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
   await s3Bucket.construct();
   const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
   await s3Bucket.sendFile(
@@ -172,10 +180,11 @@ const transcribeInvoker = async () => {
     'application/zip'
   );
 
-  const transcribeOutputBucket: S3Bucket = new S3Bucket(
-    transcribeOutputBucketName
+  /*  const transcribeOutputBucket: S3Bucket = new S3Bucket(
+    transcribeOutputBucketName,
+    true
   );
-  await transcribeOutputBucket.construct();
+  await transcribeOutputBucket.construct(); */
 
   const lambda: Lambda = new Lambda(
     `my-custom-lambda`,
@@ -197,6 +206,40 @@ const transcribeInvoker = async () => {
   await sleep(600000);
   await lambda.destroy();
   await apiGateway.destroy();
-  await transcribeOutputBucket.destroy();
+  //await transcribeOutputBucket.destroy();
 };
-transcribeInvoker();
+//transcribeInvoker();
+
+const videoDownloader = async () => {
+  const s3Bucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName, false);
+  await s3Bucket.construct();
+  const lambdaZipFilePath = await archiveSourceCodeAndGetPath();
+  await s3Bucket.sendFile(
+    lambdaZipFilePath,
+    lambdaZipFilePath,
+    'application/zip'
+  );
+
+  const lambda: Lambda = new Lambda(
+    `my-custom-lambda`,
+    lambdaZipFileS3BucketName,
+    lambdaZipFilePath,
+    videoDownloadLambdaHandler,
+    60
+  );
+  await lambda.construct();
+  const lambdaArn = await lambda.getArn();
+  throwIfNull(lambdaArn);
+
+  const apiGateway = new ApiGateway('subtractor');
+  await apiGateway.construct();
+  await apiGateway.createNewResource('download', lambdaArn, 'POST');
+  const apiUrl = await apiGateway.createDeployment();
+
+  console.log(apiUrl);
+  await sleep(600000);
+  await lambda.destroy();
+  await apiGateway.destroy();
+};
+
+videoDownloader();

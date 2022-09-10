@@ -13,7 +13,8 @@ export namespace CoreTranscribe {
 
   export class Transcribe {
     constructor(
-      private jobName: string,
+      private videoHashName: string,
+      private videoStoreHash: string,
       private transcribeOutputBucketName: string
     ) {}
     readonly construct = async (): Promise<void> => {
@@ -21,14 +22,12 @@ export namespace CoreTranscribe {
         async (): Promise<void> => {
           const transcriptionJobRequest: AWS.TranscribeService.StartTranscriptionJobRequest =
             {
-              TranscriptionJobName: this.jobName,
+              TranscriptionJobName: this.videoHashName,
               Media: {
                 // TODO: extract this parameter
-                MediaFileUri: 's3://videostorehash/test.mp4',
+                MediaFileUri: `s3://${this.videoStoreHash}/${this.videoHashName}`,
               },
               LanguageCode: 'en-US',
-              // TODO: extract this parameter
-              // MediaFormat: 'mp4',
               // TODO: extract this parameter
               OutputBucketName: this.transcribeOutputBucketName,
               Subtitles: {
@@ -41,7 +40,7 @@ export namespace CoreTranscribe {
             .promise();
           log.info(
             `Transcription job for ${
-              this.jobName
+              this.videoHashName
             } started, response = ${JSON.stringify(response)}`
           );
         },
@@ -55,12 +54,12 @@ export namespace CoreTranscribe {
         async (): Promise<void> => {
           const deleteTranscriptionJobRequest: AWS.TranscribeService.DeleteTranscriptionJobRequest =
             {
-              TranscriptionJobName: this.jobName,
+              TranscriptionJobName: this.videoHashName,
             };
           await transcribeClient
             .deleteTranscriptionJob(deleteTranscriptionJobRequest)
             .promise();
-          log.info(`Transcription job ${this.jobName} is deleted`);
+          log.info(`Transcription job ${this.videoHashName} is deleted`);
         },
         async (): Promise<void | null> => {
           return null;

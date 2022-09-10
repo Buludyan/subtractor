@@ -4,7 +4,7 @@ import AWS from 'aws-sdk';
 import {saveAs} from 'file-saver';
 import fixWebmDuration from 'webm-duration-fix';
 import {RecordRTCPromisesHandler} from 'recordrtc';
-import {InterfacesProjectSpecificInterfaces} from 'interfaces';
+import {InterfacesProjectSpecificConstants} from 'interfaces';
 
 import './VideoRecord.scss';
 
@@ -16,7 +16,7 @@ if (
 }
 
 const myBucket = new AWS.S3({
-  params: {Bucket: 'videostorehash'},
+  params: {Bucket: InterfacesProjectSpecificConstants.videoStoreHash},
   region: 'eu-central-1',
   credentials: {
     accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
@@ -61,15 +61,13 @@ export const VideoRecord = () => {
 
   const uploadVideo = async () => {
     if (videoBlob) {
-      const variable = InterfacesProjectSpecificInterfaces.videoNameTypeGuard;
-      console.log(variable);
       const mp4File = new File([videoBlob], 'test.mp4', {type: 'video/mp4'});
       console.log(mp4File);
 
       const params = {
         ACL: 'public-read',
         Body: mp4File,
-        Bucket: 'videostorehash',
+        Bucket: InterfacesProjectSpecificConstants.videoStoreHash,
         Key: mp4File.name,
       };
 
