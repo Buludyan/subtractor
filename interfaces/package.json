@@ -26,7 +26,7 @@
   "scripts": {
     "compile": "tsc --project tsconfig.json",
     "nodemon": "nodemon --watch src --ext ts --exec \"npm run compile\"",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm interfaces-1.0.0.tgz",
     "recompile": "npm run clean && npm run compile"
   },
   "author": "",

@@ -180,5 +180,31 @@ export namespace CoreS3Bucket {
     readonly getArn = async (): Promise<string> => {
       return `arn:aws:s3:::${this.bucketName}`;
     };
+
+    readonly setCorsForPut = async (): Promise<string> => {
+      log.info(`Setting CORS for S3 bucket ${this.bucketName}`);
+      return await awsCommand(
+        async (): Promise<string> => {
+          const getObjectReq: AWS.S3.PutBucketCorsRequest = {
+            Bucket: this.bucketName,
+            CORSConfiguration: {
+              CORSRules: [
+                {
+                  AllowedMethods: ['PUT'],
+                  AllowedOrigins: ['*'],
+                  AllowedHeaders: ['*'],
+                },
+              ],
+            },
+          };
+          const url = await s3Client.getSignedUrl('getObject', getObjectReq);
+          log.info(`CORS for S3 is set`);
+          return url;
+        },
+        async (): Promise<string | null> => {
+          return null;
+        }
+      );
+    };
   }
 }
