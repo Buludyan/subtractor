@@ -25,7 +25,9 @@
   },
   "scripts": {
     "compile": "tsc --project tsconfig.json",
-    "nodemon": "nodemon --watch src --ext ts --exec \"npm run compile\""
+    "nodemon": "nodemon --watch src --ext ts --exec \"npm run compile\"",
+    "clean": "rm -rf dist",
+    "recompile": "npm run clean && npm run compile"
   },
   "author": "",
   "license": "UNLICENSED",

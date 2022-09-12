@@ -20,7 +20,7 @@ export namespace BackEndVideoDownloadLambda {
   import videoHashNameTypeGuard = InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard;
   import videoNameTypeGuard = InterfacesProjectSpecificInterfaces.videoNameTypeGuard;
   import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
-  import hashTovideoDynamoTableName = InterfacesProjectSpecificConstants.hashTovideoDynamoTableName;
+  import hashToVideoDynamoTableName = InterfacesProjectSpecificConstants.hashToVideoDynamoTableName;
   import log = CoreLog.log;
 
   export const videoDownloadLambdaHandler =
@@ -39,7 +39,7 @@ export namespace BackEndVideoDownloadLambda {
       const body = JSON.parse(event.body);
       makeSureThatXIs<IVideoHashName>(body, videoHashNameTypeGuard);
       const videoNameTable = new KeyValueStore<IVideoName>(
-        hashTovideoDynamoTableName,
+        hashToVideoDynamoTableName,
         videoNameTypeGuard
       );
       await videoNameTable.putRecord(

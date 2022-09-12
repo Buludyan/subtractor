@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 import {CoreCommonUtils} from '../../utilities/common-utils';
 import {CoreLog} from '../../utilities/log';
 import {CoreAwsCommonUtils} from '../aws-common-utils';
-import {CoreAwsService} from './aws-service';
+import {CoreAwsService} from '../aws-service';
 
 export namespace CoreEventSourceMappingSqs {
   import throwIfNull = CoreCommonUtils.throwIfNull;

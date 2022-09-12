@@ -12,7 +12,7 @@ export namespace BackEndNameResponseLambda {
   import videoNameTypeGuard = InterfacesProjectSpecificInterfaces.videoNameTypeGuard;
   import newVideoName = InterfacesProjectSpecificInterfaces.newVideoName;
   import KeyValueStore = CoreDynamoDb.KeyValueStore;
-  import hashTovideoDynamoTableName = InterfacesProjectSpecificConstants.hashTovideoDynamoTableName;
+  import hashToVideoDynamoTableName = InterfacesProjectSpecificConstants.hashToVideoDynamoTableName;
   import log = CoreLog.log;
 
   export const nameLambdaHandler =
@@ -32,7 +32,7 @@ export namespace BackEndNameResponseLambda {
       const body = JSON.parse(event.body);
       makeSureThatXIs<IVideoName>(body, videoNameTypeGuard);
       const myTable = new KeyValueStore<IVideoName>(
-        hashTovideoDynamoTableName,
+        hashToVideoDynamoTableName,
         videoNameTypeGuard
       );
 

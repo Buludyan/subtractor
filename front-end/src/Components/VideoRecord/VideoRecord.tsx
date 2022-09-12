@@ -16,7 +16,7 @@ if (
 }
 
 const myBucket = new AWS.S3({
-  params: {Bucket: InterfacesProjectSpecificConstants.videoStoreHash},
+  params: {Bucket: InterfacesProjectSpecificConstants.videoStoreHashName},
   region: 'eu-central-1',
   credentials: {
     accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
@@ -67,7 +67,7 @@ export const VideoRecord = () => {
       const params = {
         ACL: 'public-read',
         Body: mp4File,
-        Bucket: InterfacesProjectSpecificConstants.videoStoreHash,
+        Bucket: InterfacesProjectSpecificConstants.videoStoreHashName,
         Key: mp4File.name,
       };
 
