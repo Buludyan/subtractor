@@ -154,6 +154,7 @@ export namespace CoreApiGateway {
       await this.putMethodResponse(resource, method);
       await this.putIntegration(resource, lambdaArn, method);
       await this.putIntegrationResponse(resource, method);
+      await this.enableCors(resource, method);
       return resource;
     };
 
@@ -250,6 +251,81 @@ export namespace CoreApiGateway {
           };
           await apiGatewayClient.putMethod(putMethodReq).promise();
           log.info(`Method ${method} for resource ${resource.id} has added`);
+        },
+        async (): Promise<void | null> => {
+          return null;
+        }
+      );
+    };
+    private readonly enableCors = async (
+      resource: Resource,
+      httpMethod: 'POST' | 'GET'
+    ): Promise<void> => {
+      log.info(`Enabling CORS for resource ${resource.id}`);
+      return await awsCommand(
+        async (): Promise<void> => {
+          const updateGatewayResponseReq: AWS.APIGateway.UpdateGatewayResponseRequest =
+            {
+              restApiId: resource.restApiId,
+              responseType: 'DEFAULT_4XX',
+              patchOperations: [
+                {
+                  op: 'add',
+                  path: '/responseParameters/gatewayresponse.header.Access-Control-Allow-Headers',
+                  value:
+                    "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                },
+                {
+                  op: 'add',
+                  path: '/responseParameters/gatewayresponse.header.Access-Control-Allow-Methods',
+                  value: "'POST'",
+                },
+                {
+                  op: 'add',
+                  path: '/responseParameters/gatewayresponse.header.Access-Control-Allow-Origin',
+                  value: "'*'",
+                },
+              ],
+            };
+          await apiGatewayClient
+            .updateGatewayResponse(updateGatewayResponseReq)
+            .promise();
+
+          const updateMethodResponseReq: AWS.APIGateway.UpdateMethodResponseRequest =
+            {
+              httpMethod: httpMethod,
+              resourceId: resource.id,
+              restApiId: resource.restApiId,
+              statusCode: '200',
+              patchOperations: [
+                {
+                  op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Origin',
+                },
+              ],
+            };
+          await apiGatewayClient
+            .updateMethodResponse(updateMethodResponseReq)
+            .promise();
+
+          const updateIntegrationResponseReq: AWS.APIGateway.UpdateIntegrationResponseRequest =
+            {
+              httpMethod: httpMethod,
+              resourceId: resource.id,
+              restApiId: resource.restApiId,
+              statusCode: '200',
+              patchOperations: [
+                {
+                  op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Origin',
+                  value: "'*'",
+                },
+              ],
+            };
+          await apiGatewayClient
+            .updateIntegrationResponse(updateIntegrationResponseReq)
+            .promise();
+          log.info(`Enabled CORS for resource ${resource.id}`);
         },
         async (): Promise<void | null> => {
           return null;
