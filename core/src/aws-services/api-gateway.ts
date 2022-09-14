@@ -306,6 +306,14 @@ export namespace CoreApiGateway {
               patchOperations: [
                 {
                   op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Headers',
+                },
+                {
+                  op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Methods',
+                },
+                {
+                  op: 'add',
                   path: '/responseParameters/method.response.header.Access-Control-Allow-Origin',
                 },
               ],
@@ -321,6 +329,17 @@ export namespace CoreApiGateway {
               restApiId: resource.restApiId,
               statusCode: '200',
               patchOperations: [
+                {
+                  op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Headers',
+                  value:
+                    "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                },
+                {
+                  op: 'add',
+                  path: '/responseParameters/method.response.header.Access-Control-Allow-Methods',
+                  value: "'OPTIONS,POST'",
+                },
                 {
                   op: 'add',
                   path: '/responseParameters/method.response.header.Access-Control-Allow-Origin',
