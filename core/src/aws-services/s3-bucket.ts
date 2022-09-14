@@ -27,7 +27,6 @@ export namespace CoreS3Bucket {
           };
 
           await s3Client.createBucket(createBucketRequest).promise();
-          this.setCorsForPut();
           log.info(`S3 bucket constructed ${this.bucketName}`);
         },
         async (err: AWSError): Promise<void | null> => {
@@ -182,28 +181,26 @@ export namespace CoreS3Bucket {
       return `arn:aws:s3:::${this.bucketName}`;
     };
 
-    readonly setCorsForPut = async (): Promise<string> => {
+    readonly setCorsForPut = async (): Promise<void> => {
       log.info(`Setting CORS for S3 bucket ${this.bucketName}`);
       return await awsCommand(
-        async (): Promise<string> => {
-          const getObjectReq: AWS.S3.PutBucketCorsRequest = {
+        async (): Promise<void> => {
+          const putBucketCorsReq: AWS.S3.PutBucketCorsRequest = {
             Bucket: this.bucketName,
             CORSConfiguration: {
               CORSRules: [
                 {
+                  AllowedHeaders: ['*'],
                   AllowedMethods: ['PUT'],
                   AllowedOrigins: ['*'],
-                  AllowedHeaders: ['*'],
-                  MaxAgeSeconds: 3000,
                 },
               ],
             },
           };
-          const url = await s3Client.getSignedUrl('getObject', getObjectReq);
+          await s3Client.putBucketCors(putBucketCorsReq).promise();
           log.info(`CORS for S3 is set`);
-          return url;
         },
-        async (): Promise<string | null> => {
+        async (): Promise<void | null> => {
           return null;
         }
       );
