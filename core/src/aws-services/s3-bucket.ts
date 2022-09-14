@@ -27,6 +27,7 @@ export namespace CoreS3Bucket {
           };
 
           await s3Client.createBucket(createBucketRequest).promise();
+          this.setCorsForPut();
           log.info(`S3 bucket constructed ${this.bucketName}`);
         },
         async (err: AWSError): Promise<void | null> => {
@@ -193,6 +194,7 @@ export namespace CoreS3Bucket {
                   AllowedMethods: ['PUT'],
                   AllowedOrigins: ['*'],
                   AllowedHeaders: ['*'],
+                  MaxAgeSeconds: 3000,
                 },
               ],
             },

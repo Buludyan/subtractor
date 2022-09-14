@@ -44,6 +44,11 @@ export namespace BackEndNameResponseLambda {
         body: JSON.stringify({
           record,
         }),
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Content-Type': 'application/json',
+        },
       };
     } catch (err) {
       log.error(JSON.stringify(err));

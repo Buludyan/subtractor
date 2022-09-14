@@ -44,6 +44,11 @@ export namespace BackEndTranscribeInvokeLambda {
       return {
         statusCode: 200,
         body: `Transcription job for ${body.videoHashName} started`,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Content-Type': 'application/json',
+        },
       };
     } catch (err) {
       log.error(JSON.stringify(err));

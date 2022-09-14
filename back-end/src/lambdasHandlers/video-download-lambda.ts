@@ -76,6 +76,11 @@ export namespace BackEndVideoDownloadLambda {
         return {
           statusCode: 200,
           body: JSON.stringify(newVideoURL(videoFileURL)),
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Content-Type': 'application/json',
+          },
         };
       }
     } catch (err) {

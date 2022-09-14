@@ -1,12 +1,16 @@
 import {useState} from 'react';
-
 import AWS from 'aws-sdk';
 import {saveAs} from 'file-saver';
 import fixWebmDuration from 'webm-duration-fix';
 import {RecordRTCPromisesHandler} from 'recordrtc';
-import {InterfacesProjectSpecificConstants} from 'interfaces';
+import {
+  InterfacesProjectSpecificConstants,
+  InterfacesProjectSpecificInterfaces,
+} from 'interfaces';
 
 import './VideoRecord.scss';
+import {subtractorApi} from '../../Axios/Axios';
+import axios from 'axios';
 
 if (
   !process.env.REACT_APP_AWS_ACCESS_KEY ||
@@ -85,16 +89,40 @@ export const VideoRecord = () => {
               console.log('Video successfully sent');
             }
           });
+
+        const prepareReqObj = {
+          _guard: InterfacesProjectSpecificInterfaces.videoNameTypeGuard,
+          videoName: 'test.mp4',
+        };
+        const prepResponse = await subtractorApi.prepare(prepareReqObj);
+        console.log('prepare:', prepResponse);
+
+        const processReqObj = {
+          _guard: InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard,
+          videoHashName: 'test.mp4',
+        };
+        const procResponse = await subtractorApi.process(processReqObj);
+        console.log('process:', procResponse);
       } catch (exception) {
         console.log(exception);
       }
-      saveAs(mp4File, `Video-${Date.now()}.mp4`);
+      //saveAs(mp4File, `Video-${Date.now()}.mp4`);
     }
     setVideoUrlBlob(null);
   };
 
+  const download = async () => {
+    const downloadReqObj = {
+      _guard: InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard,
+      videoHashName: 'test.mp4',
+    };
+    const downloadResponse = await subtractorApi.download(downloadReqObj);
+    console.log('dowload:', downloadResponse);
+  };
+
   return (
     <div>
+      <button onClick={download}>Download</button>
       <button onClick={startRecording}>Start Recording</button>
       <button onClick={stopRecording}>Stop Recording</button>
       <button onClick={uploadVideo}>Upload</button>
