@@ -155,6 +155,12 @@ export namespace CoreApiGateway {
       await this.putIntegration(resource, lambdaArn, method);
       await this.putIntegrationResponse(resource, method);
       await this.enableCors(resource, method);
+
+      await this.putMethod(resource, 'OPTIONS');
+      await this.putMethodResponse(resource, 'OPTIONS');
+      await this.putIntegration(resource, null, 'OPTIONS');
+      await this.putIntegrationResponse(resource, 'OPTIONS');
+      await this.enableCors(resource, 'OPTIONS');
       return resource;
     };
 
@@ -238,7 +244,7 @@ export namespace CoreApiGateway {
     };
     private readonly putMethod = async (
       resource: Resource,
-      method: 'POST' | 'GET'
+      method: 'POST' | 'GET' | 'OPTIONS'
     ): Promise<void> => {
       log.info(`Adding method ${method} for resource ${resource.id}`);
       return await awsCommand(
@@ -259,7 +265,7 @@ export namespace CoreApiGateway {
     };
     private readonly enableCors = async (
       resource: Resource,
-      httpMethod: 'POST' | 'GET'
+      httpMethod: 'POST' | 'GET' | 'OPTIONS'
     ): Promise<void> => {
       log.info(`Enabling CORS for resource ${resource.id}`);
       return await awsCommand(
@@ -334,8 +340,8 @@ export namespace CoreApiGateway {
     };
     private readonly putIntegration = async (
       resource: Resource,
-      lambdaArn: string,
-      httpMethod: 'POST' | 'GET'
+      lambdaArn: string | null,
+      httpMethod: 'POST' | 'GET' | 'OPTIONS'
     ): Promise<void> => {
       log.info(`Adding integration for resource ${resource.id}`);
       return await awsCommand(
@@ -347,8 +353,9 @@ export namespace CoreApiGateway {
             restApiId: resource.restApiId,
             resourceId: resource.id,
             integrationHttpMethod: httpMethod,
-            type: 'AWS_PROXY',
-            uri: uri,
+            ...(isNull(lambdaArn)
+              ? {type: 'MOCK'}
+              : {type: 'AWS_PROXY', uri: uri}),
           };
           await apiGatewayClient.putIntegration(putIntegrationReq).promise();
           log.info(`Integration for resource ${resource.id} has added`);
@@ -360,7 +367,7 @@ export namespace CoreApiGateway {
     };
     private readonly putIntegrationResponse = async (
       resource: Resource,
-      httpMethod: 'POST' | 'GET'
+      httpMethod: 'POST' | 'GET' | 'OPTIONS'
     ): Promise<void> => {
       log.info(`Adding integration responce for resource ${resource.id}`);
       return await awsCommand(
@@ -386,7 +393,7 @@ export namespace CoreApiGateway {
     };
     private readonly putMethodResponse = async (
       resource: Resource,
-      httpMethod: 'POST' | 'GET'
+      httpMethod: 'POST' | 'GET' | 'OPTIONS'
     ): Promise<void> => {
       log.info(`Adding method response for resource ${resource.id}`);
       return await awsCommand(

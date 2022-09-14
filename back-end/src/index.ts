@@ -97,6 +97,7 @@ const initiate = async () => {
 
   const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHashName);
   await videoStoreHashBucket.construct();
+  await videoStoreHashBucket.setCorsForPut();
 
   const transcribeOutputBucket: S3Bucket = new S3Bucket(
     transcribeOutputBucketName
