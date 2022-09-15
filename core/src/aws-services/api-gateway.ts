@@ -284,7 +284,7 @@ export namespace CoreApiGateway {
                 {
                   op: 'add',
                   path: '/responseParameters/gatewayresponse.header.Access-Control-Allow-Methods',
-                  value: "'POST'",
+                  value: "'OPTIONS,POST'",
                 },
                 {
                   op: 'add',
@@ -373,7 +373,10 @@ export namespace CoreApiGateway {
             resourceId: resource.id,
             integrationHttpMethod: httpMethod,
             ...(isNull(lambdaArn)
-              ? {type: 'MOCK'}
+              ? {
+                  type: 'MOCK',
+                  requestTemplates: {'application/json': '{"statusCode": 200}'},
+                }
               : {type: 'AWS_PROXY', uri: uri}),
           };
           await apiGatewayClient.putIntegration(putIntegrationReq).promise();
