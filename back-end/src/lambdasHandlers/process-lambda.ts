@@ -7,17 +7,17 @@ import {CoreCommonUtils} from 'core';
 import {CoreTranscribe} from 'core';
 import {CoreLog} from 'core';
 
-export namespace BackEndTranscribeInvokeLambda {
+export namespace BackEndProcessLambda {
   import isNull = CoreCommonUtils.isNull;
   import Transcribe = CoreTranscribe.Transcribe;
   import makeSureThatXIs = CoreCommonUtils.makeSureThatXIs;
   import IVideoHashName = InterfacesProjectSpecificInterfaces.IVideoHashName;
   import videoHashNameTypeGuard = InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard;
-  import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
-  import videoStoreHashName = InterfacesProjectSpecificConstants.videoStoreHashName;
+  import transcribeOutputStoreName = InterfacesProjectSpecificConstants.transcribeOutputStoreName;
+  import videoStoreName = InterfacesProjectSpecificConstants.videoStoreName;
   import log = CoreLog.log;
 
-  export const transcribeLambdaHandler =
+  export const processLambdaHandler =
     'dist/src/lambdasHandlers/transcribe-invoke-lambda.BackEndTranscribeInvokeLambda.transcribeInvoke';
 
   export const transcribeInvoke = async (
@@ -27,34 +27,35 @@ export namespace BackEndTranscribeInvokeLambda {
     try {
       if (isNull(event.body)) {
         return {
-          statusCode: 403,
-          body: 'Invalid input',
+          statusCode: 400,
+          body: 'Invalid input, expecting body with \n{\n\t_guard: videoHashNameTypeGuard,\n\tvideoHashName: <hash video name>\n}',
         };
       }
       const body = JSON.parse(event.body);
       makeSureThatXIs<IVideoHashName>(body, videoHashNameTypeGuard);
-      const newJob = new Transcribe(
+      const transcribeNewJob = new Transcribe(
         body.videoHashName,
-        videoStoreHashName,
-        transcribeOutputBucketName
+        videoStoreName,
+        transcribeOutputStoreName
       );
 
-      await newJob.construct();
+      await transcribeNewJob.construct();
 
       return {
         statusCode: 200,
         body: `Transcription job for ${body.videoHashName} started`,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Content-Type': 'application/json',
-        },
+        // TODO: investigate
+        // headers: {
+        //   'Access-Control-Allow-Origin': '*',
+        //   'Access-Control-Allow-Headers': 'Content-Type',
+        //   'Content-Type': 'application/json',
+        // },
       };
     } catch (err) {
       log.error(JSON.stringify(err));
       return {
         statusCode: 515,
-        body: 'Internal Server Error (our)',
+        body: `Internal Server Error \n ${err}`,
       };
     }
   };

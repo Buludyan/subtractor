@@ -158,7 +158,7 @@ export namespace CoreS3Bucket {
     readonly getSignedURL = async (
       fileName: string,
       changeNameTo: string
-    ): Promise<string | null> => {
+    ): Promise<string> => {
       log.info(`Getting file ${fileName} from S3 bucket ${this.bucketName}`);
       return await awsCommand(
         async (): Promise<string> => {

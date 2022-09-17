@@ -8,7 +8,7 @@ const initialState: InitialState = {
   isWebcamOn: false,
   videoBlob: null,
   videoFile: null,
-  videoName: InterfacesProjectSpecificConstants.videoName,
+  videoName: InterfacesProjectSpecificConstants.webcamVideoName,
   videoUri: null,
 };
 
