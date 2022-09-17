@@ -1,10 +1,9 @@
-import {BackEndTranscribeInvokeLambda} from './lambdasHandlers/transcribe-invoke-lambda';
-import {BackEndNameResponseLambda} from './lambdasHandlers/name-response-lambda';
-import {BackEndVideoDownloadLambda} from './lambdasHandlers/video-download-lambda';
+import {BackEndProcessLambda} from './lambdasHandlers/process-lambda';
+import {BackEndPrepareLambda} from './lambdasHandlers/prepare-lambda';
+import {BackEndDownloadLambda} from './lambdasHandlers/download-lambda';
 import {CoreS3Bucket} from 'core';
 import {CoreDynamoDb} from 'core';
 import {CoreCommonUtils} from 'core';
-//import {CoreAwsService} from 'core';
 import {
   InterfacesProjectSpecificInterfaces,
   InterfacesProjectSpecificConstants,
@@ -16,25 +15,24 @@ import {CoreLambda} from 'core';
 import sleep = CoreCommonUtils.sleep;
 import archiveSourceCodeAndGetPath = CoreCommonUtils.archiveSourceCodeAndGetPath;
 import throwIfNull = CoreCommonUtils.throwIfNull;
-import nameLambdaHandler = BackEndNameResponseLambda.nameLambdaHandler;
-import transcribeLambdaHandler = BackEndTranscribeInvokeLambda.transcribeLambdaHandler;
-import videoDownloadLambdaHandler = BackEndVideoDownloadLambda.videoDownloadLambdaHandler;
+import prepareLambdaHandler = BackEndPrepareLambda.prepareLambdaHandler;
+import processLambdaHandler = BackEndProcessLambda.processLambdaHandler;
+import downloadLambdaHandler = BackEndDownloadLambda.downloadLambdaHandler;
 import log = CoreLog.log;
 import KeyValueStore = CoreDynamoDb.KeyValueStore;
-import IVideoName = InterfacesProjectSpecificInterfaces.IVideoName;
-import videoNameTypeGuard = InterfacesProjectSpecificInterfaces.videoNameTypeGuard;
-import hashToVideoDynamoTableName = InterfacesProjectSpecificConstants.hashToVideoDynamoTableName;
+import IVideoOriginalName = InterfacesProjectSpecificInterfaces.IVideoOriginalName;
+import videoOriginalNameTypeGuard = InterfacesProjectSpecificInterfaces.videoOriginalNameTypeGuard;
+import hashNameToOriginalNameDynamoTableName = InterfacesProjectSpecificConstants.hashNameToOriginalNameDynamoTableName;
 import lambdaZipFileS3BucketName = InterfacesProjectSpecificConstants.lambdaZipFileS3BucketName;
-import transcribeOutputBucketName = InterfacesProjectSpecificConstants.transcribeOutputBucketName;
-import videonameLambdaName = InterfacesProjectSpecificConstants.videonameLambdaName;
-import transcribeLambdaName = InterfacesProjectSpecificConstants.transcribeLambdaName;
+import transcribeOutputStoreName = InterfacesProjectSpecificConstants.transcribeOutputStoreName;
+import prepareLambdaName = InterfacesProjectSpecificConstants.prepareLambdaName;
+import processLambdaName = InterfacesProjectSpecificConstants.processLambdaName;
 import downloadLambdaName = InterfacesProjectSpecificConstants.downloadLambdaName;
-import videoStoreHashName = InterfacesProjectSpecificConstants.videoStoreHashName;
+import videoStoreName = InterfacesProjectSpecificConstants.videoStoreName;
 import apiGatewayName = InterfacesProjectSpecificConstants.apiGatewayName;
 import S3Bucket = CoreS3Bucket.S3Bucket;
 import Lambda = CoreLambda.Lambda;
 import ApiGateway = CoreApiGateway.ApiGateway;
-//import AwsService = CoreAwsService.AwsService;
 
 log.info(`Compilation passed successfully!`);
 
@@ -49,33 +47,33 @@ const initiate = async () => {
     false
   );
 
-  const nameLambda: Lambda = new Lambda(
-    videonameLambdaName,
+  const prepareLambda: Lambda = new Lambda(
+    prepareLambdaName,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    nameLambdaHandler,
+    prepareLambdaHandler,
     60
   );
-  await nameLambda.construct();
-  const nameLambdaArn = await nameLambda.getArn();
-  throwIfNull(nameLambdaArn);
+  await prepareLambda.construct();
+  const prepareLambdaArn = await prepareLambda.getArn();
+  throwIfNull(prepareLambdaArn);
 
-  const transcribeLambda: Lambda = new Lambda(
-    transcribeLambdaName,
+  const processLambda: Lambda = new Lambda(
+    processLambdaName,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    transcribeLambdaHandler,
+    processLambdaHandler,
     60
   );
-  await transcribeLambda.construct();
-  const transcribeLambdaArn = await transcribeLambda.getArn();
-  throwIfNull(transcribeLambdaArn);
+  await processLambda.construct();
+  const processLambdaArn = await processLambda.getArn();
+  throwIfNull(processLambdaArn);
 
   const downloadLambda: Lambda = new Lambda(
     downloadLambdaName,
     lambdaZipFileS3BucketName,
     lambdaZipFilePath,
-    videoDownloadLambdaHandler,
+    downloadLambdaHandler,
     60
   );
   await downloadLambda.construct();
@@ -84,49 +82,47 @@ const initiate = async () => {
 
   const apiGateway = new ApiGateway(apiGatewayName);
   await apiGateway.construct();
-  await apiGateway.createNewResource('prepare', nameLambdaArn, 'POST');
-  await apiGateway.createNewResource('process', transcribeLambdaArn, 'POST');
+  await apiGateway.createNewResource('prepare', prepareLambdaArn, 'POST');
+  await apiGateway.createNewResource('process', processLambdaArn, 'POST');
   await apiGateway.createNewResource('download', downloadLambdaArn, 'POST');
   const apiUrl = await apiGateway.createDeployment();
 
-  const hashToVideoDynamoTable = new KeyValueStore<IVideoName>(
-    hashToVideoDynamoTableName,
-    videoNameTypeGuard
-  );
-  await hashToVideoDynamoTable.construct();
+  const hashNameToOriginalNameDynamoTable =
+    new KeyValueStore<IVideoOriginalName>(
+      hashNameToOriginalNameDynamoTableName,
+      videoOriginalNameTypeGuard
+    );
+  await hashNameToOriginalNameDynamoTable.construct();
 
-  const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHashName);
-  await videoStoreHashBucket.construct();
-  await videoStoreHashBucket.setCors(['PUT']);
+  const videoStore: S3Bucket = new S3Bucket(videoStoreName);
+  await videoStore.construct();
+  await videoStore.setCors(['PUT']);
 
-  const transcribeOutputBucket: S3Bucket = new S3Bucket(
-    transcribeOutputBucketName
+  const transcribeOutputStore: S3Bucket = new S3Bucket(
+    transcribeOutputStoreName
   );
-  await transcribeOutputBucket.construct();
-  await transcribeOutputBucket.setCors(['GET']);
+  await transcribeOutputStore.construct();
+  await transcribeOutputStore.setCors(['GET']);
 
   console.log(apiUrl);
 };
 
 const demolish = async () => {
-  const LambdaBucket: S3Bucket = new S3Bucket(lambdaZipFileS3BucketName);
-  await LambdaBucket.destroy();
-
   const nameLambda: Lambda = new Lambda(
-    videonameLambdaName,
+    prepareLambdaName,
     // TODO: getRidOfParams
     '/',
     '/',
-    nameLambdaHandler,
+    prepareLambdaHandler,
     60
   );
   await nameLambda.destroy();
 
   const transcribeLambda: Lambda = new Lambda(
-    transcribeLambdaName,
+    processLambdaName,
     '/',
     '/',
-    transcribeLambdaHandler,
+    processLambdaHandler,
     60
   );
   await transcribeLambda.destroy();
@@ -135,7 +131,7 @@ const demolish = async () => {
     downloadLambdaName,
     '/',
     '/',
-    videoDownloadLambdaHandler,
+    downloadLambdaHandler,
     60
   );
   await downloadLambda.destroy();
@@ -143,17 +139,9 @@ const demolish = async () => {
   const apiGateway = new ApiGateway(apiGatewayName);
   await apiGateway.destroy();
 
-  const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHashName);
-  await videoStoreHashBucket.destroy();
-
-  const transcribeOutputBucket: S3Bucket = new S3Bucket(
-    transcribeOutputBucketName
-  );
-  await transcribeOutputBucket.destroy();
-
-  const hashToVideoDynamoTable = new KeyValueStore<IVideoName>(
-    hashToVideoDynamoTableName,
-    videoNameTypeGuard
+  const hashToVideoDynamoTable = new KeyValueStore<IVideoOriginalName>(
+    hashNameToOriginalNameDynamoTableName,
+    videoOriginalNameTypeGuard
   );
   await hashToVideoDynamoTable.destroy();
 };
@@ -161,7 +149,7 @@ const demolish = async () => {
 const main = async () => {
   //await demolish();
   await initiate();
-  await sleep(100000);
+  await sleep(600000);
   await demolish();
 };
 

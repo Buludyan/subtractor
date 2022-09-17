@@ -21,10 +21,9 @@
     "axios": "^0.27.2",
     "browserify-zlib": "^0.2.0",
     "constants-browserify": "^1.0.0",
-    "core": "file:../core",
     "file-saver": "^2.0.5",
     "gts": "^3.1.0",
-    "interfaces": "file:../interfaces",
+    "interfaces": "file:../interfaces/interfaces-1.0.0.tgz",
     "node-sass": "^7.0.1",
     "os-browserify": "^0.3.0",
     "path": "^0.12.7",
@@ -43,6 +42,7 @@
     "webm-duration-fix": "^1.0.4"
   },
   "scripts": {
+    "installInterfaces": "npm uninstall interfaces && npm i ../interfaces/interfaces-1.0.0.tgz",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

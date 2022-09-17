@@ -19,7 +19,7 @@ export const RecordPage = () => {
     localStorage.setItem(
       'videoName',
       JSON.stringify({
-        videoName: InterfacesProjectSpecificConstants.videoName,
+        videoName: InterfacesProjectSpecificConstants.webcamVideoName,
       })
     );
   }, []);

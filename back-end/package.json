@@ -34,7 +34,7 @@
     "compile": "tsc --project tsconfig.json",
     "compileAndRun": "npm run compile && node dist/src/index.js",
     "nodemon": "nodemon --watch src --ext ts --exec \"npm run compileAndRun\"",
-    "clean": "rm -rf dist && rm back-end-1.0.0.tgz",
+    "clean": "rm -rf dist",
     "recompile": "npm run clean && npm run compile"
   },
   "author": "",

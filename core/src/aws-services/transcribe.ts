@@ -15,23 +15,21 @@ export namespace CoreTranscribe {
 
   export class Transcribe implements AwsService {
     constructor(
-      private videoHashName: string,
-      private videoStoreHash: string,
-      private transcribeOutputBucketName: string
+      private videoName: string,
+      private videoStore: string,
+      private transcribeOutputStore: string
     ) {}
     readonly construct = async (): Promise<void> => {
       return await awsCommand(
         async (): Promise<void> => {
           const transcriptionJobRequest: AWS.TranscribeService.StartTranscriptionJobRequest =
             {
-              TranscriptionJobName: this.videoHashName,
+              TranscriptionJobName: this.videoName,
               Media: {
-                // TODO: extract this parameter
-                MediaFileUri: `s3://${this.videoStoreHash}/${this.videoHashName}`,
+                MediaFileUri: `s3://${this.videoStore}/${this.videoName}`,
               },
               LanguageCode: 'en-US',
-              // TODO: extract this parameter
-              OutputBucketName: this.transcribeOutputBucketName,
+              OutputBucketName: this.transcribeOutputStore,
               Subtitles: {
                 Formats: ['srt'],
                 OutputStartIndex: 1,
@@ -42,7 +40,7 @@ export namespace CoreTranscribe {
             .promise();
           log.info(
             `Transcription job for ${
-              this.videoHashName
+              this.videoName
             } started, response = ${JSON.stringify(response)}`
           );
         },
@@ -56,12 +54,12 @@ export namespace CoreTranscribe {
         async (): Promise<void> => {
           const deleteTranscriptionJobRequest: AWS.TranscribeService.DeleteTranscriptionJobRequest =
             {
-              TranscriptionJobName: this.videoHashName,
+              TranscriptionJobName: this.videoName,
             };
           await transcribeClient
             .deleteTranscriptionJob(deleteTranscriptionJobRequest)
             .promise();
-          log.info(`Transcription job ${this.videoHashName} is deleted`);
+          log.info(`Transcription job ${this.videoName} is deleted`);
         },
         async (): Promise<void | null> => {
           return null;
