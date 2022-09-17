@@ -97,12 +97,13 @@ const initiate = async () => {
 
   const videoStoreHashBucket: S3Bucket = new S3Bucket(videoStoreHashName);
   await videoStoreHashBucket.construct();
-  await videoStoreHashBucket.setCorsForPut();
+  await videoStoreHashBucket.setCors(['PUT']);
 
   const transcribeOutputBucket: S3Bucket = new S3Bucket(
     transcribeOutputBucketName
   );
   await transcribeOutputBucket.construct();
+  await transcribeOutputBucket.setCors(['GET']);
 
   console.log(apiUrl);
 };

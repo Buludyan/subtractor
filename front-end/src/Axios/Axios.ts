@@ -4,7 +4,7 @@ import axios, {AxiosResponse} from 'axios';
 
 const Axios = axios.create({
   baseURL:
-    'https://8b58vl87r4.execute-api.eu-central-1.amazonaws.com/subtractor',
+    'https://dxqqulh3qa.execute-api.eu-central-1.amazonaws.com/subtractor',
 });
 
 export const subtractorApi = {

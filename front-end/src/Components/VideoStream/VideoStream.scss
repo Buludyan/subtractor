@@ -1,4 +1,14 @@
 .stream {
-  -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
+
+  &__pause {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    border: 2px solid blue;
+  }
+
+  &__rec {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    border: 2px solid red;
+  }
 }

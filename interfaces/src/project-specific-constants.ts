@@ -9,4 +9,6 @@ export namespace InterfacesProjectSpecificConstants {
   export const videoStoreHashName = 'subtractor-video-store-hash';
   export const transcribeOutputBucketName =
     'subtractor-transcribe-output-bucket';
+
+  export const videoName = 'webcam-video.mp4';
 }

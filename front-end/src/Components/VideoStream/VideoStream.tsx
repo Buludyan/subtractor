@@ -1,9 +1,12 @@
 import {useEffect, useRef} from 'react';
+import {useAppSelector} from '../../Hooks/Selector';
+import {ControlBtns} from '../ControlBtns/ControlBtns';
 
 import './VideoStream.scss';
 
 export const VideoStream = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const {isRecording, videoUri} = useAppSelector(state => state.subtractor);
 
   const streamVideo = () => {
     navigator.mediaDevices
@@ -26,8 +29,12 @@ export const VideoStream = () => {
   }, [videoRef]);
 
   return (
-    <div className="stream">
-      <video ref={videoRef}> </video>
+    <div className="stream" style={{display: videoUri ? 'none' : 'inline'}}>
+      <ControlBtns />
+      <video
+        ref={videoRef}
+        className={isRecording ? 'stream__rec' : 'stream__pause'}
+      />
     </div>
   );
 };

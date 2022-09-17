@@ -181,7 +181,7 @@ export namespace CoreS3Bucket {
       return `arn:aws:s3:::${this.bucketName}`;
     };
 
-    readonly setCorsForPut = async (): Promise<void> => {
+    readonly setCors = async (methods: ('PUT' | 'GET')[]): Promise<void> => {
       log.info(`Setting CORS for S3 bucket ${this.bucketName}`);
       return await awsCommand(
         async (): Promise<void> => {
@@ -191,7 +191,7 @@ export namespace CoreS3Bucket {
               CORSRules: [
                 {
                   AllowedHeaders: ['*'],
-                  AllowedMethods: ['PUT'],
+                  AllowedMethods: [...methods],
                   AllowedOrigins: ['*'],
                 },
               ],

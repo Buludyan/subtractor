@@ -56,6 +56,11 @@ export namespace BackEndVideoDownloadLambda {
         return {
           statusCode: 404,
           body: 'Requested file not found',
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Content-Type': 'application/json',
+          },
         };
       }
 
@@ -71,6 +76,11 @@ export namespace BackEndVideoDownloadLambda {
         return {
           statusCode: 404,
           body: 'Requested file not found',
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Content-Type': 'application/json',
+          },
         };
       } else {
         return {
