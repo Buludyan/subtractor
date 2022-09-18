@@ -10,6 +10,12 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import AWS from 'aws-sdk';
 import {IconButton} from '@mui/material';
 
+// import newVideoOriginalName = InterfacesProjectSpecificInterfaces.newVideoOriginalName;
+// import IVideoHashName = InterfacesProjectSpecificInterfaces.IVideoHashName;
+// import videoHashNameTypeGuard = InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard;
+// import IGuard = InterfacesProjectSpecificInterfaces.IGuard;
+// import videoStoreName = InterfacesProjectSpecificConstants.videoStoreName;
+
 if (
   !process.env.REACT_APP_AWS_ACCESS_KEY ||
   !process.env.REACT_APP_AWS_SECRET_KEY
@@ -18,7 +24,7 @@ if (
 }
 
 const myBucket = new AWS.S3({
-  params: {Bucket: InterfacesProjectSpecificConstants.videoStoreHashName},
+  params: {Bucket: InterfacesProjectSpecificConstants.videoStoreName},
   region: 'eu-central-1',
   credentials: {
     accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
@@ -26,57 +32,77 @@ const myBucket = new AWS.S3({
   },
 });
 
+export type TypeGuardOf<T> =
+  T extends InterfacesProjectSpecificInterfaces.IGuard<
+    infer TypeGuard extends string
+  >
+    ? TypeGuard
+    : never;
+export function makeSureThatXIs<T>(
+  x: unknown,
+  typeGuard: TypeGuardOf<T>
+): asserts x is T {
+  if (
+    (x as InterfacesProjectSpecificInterfaces.IGuard<TypeGuardOf<T>>)._guard !==
+    typeGuard
+  ) {
+    const errorMessage = 'TypeGuard check failed';
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
 export const UploadBtn = () => {
   const {setVideoUrlBlob} = useActions();
   const {videoBlob, videoFile, videoName} = useAppSelector(
     state => state.subtractor
   );
   console.log(videoName, videoFile);
-  const uploadVideo = () => {
-    if (videoBlob || videoFile) {
-      let mp4File;
-      if (videoBlob) {
-        mp4File = new File([videoBlob], videoName, {type: 'video/mp4'});
-      }
-      if (videoFile) {
-        mp4File = videoFile;
-      }
-      console.log(mp4File);
-      if (!mp4File) return;
+  const getCorrectVideoFile = (): File => {
+    if (videoFile) {
+      return videoFile;
+    }
+    if (videoBlob) {
+      return new File([videoBlob], videoName, {type: 'video/mp4'});
+    } else {
+      throw new Error(`Cannot reach here`);
+    }
+  };
+  const uploadVideo = async () => {
+    if (!videoBlob && !videoFile) {
+      return;
+    }
 
-      const params = {
+    const mp4File = getCorrectVideoFile();
+    console.log(mp4File);
+
+    try {
+      const prepareReqObj =
+        InterfacesProjectSpecificInterfaces.newVideoOriginalName(videoName);
+      const prepResponse = await subtractorApi.prepare(prepareReqObj);
+      console.log('prepare:', prepResponse);
+      const videoHashName = prepResponse.data;
+      makeSureThatXIs<InterfacesProjectSpecificInterfaces.IVideoHashName>(
+        videoHashName,
+        InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard
+      );
+
+      const putObjectParams = {
         ACL: 'public-read',
         Body: mp4File,
-        Bucket: InterfacesProjectSpecificConstants.videoStoreHashName,
-        Key: videoName,
+        Bucket: InterfacesProjectSpecificConstants.videoStoreName,
+        Key: videoHashName.videoHashName,
       };
+      await myBucket.putObject(putObjectParams).promise();
+      console.log('Video successfully sent');
 
-      try {
-        myBucket.putObject(params).send(async err => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log('Video successfully sent');
-            const prepareReqObj = {
-              _guard: InterfacesProjectSpecificInterfaces.videoNameTypeGuard,
-              videoName: videoName,
-            };
-            const prepResponse = await subtractorApi.prepare(prepareReqObj);
-            console.log('prepare:', prepResponse);
-
-            const processReqObj = {
-              _guard:
-                InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard,
-              videoHashName: videoName,
-            };
-            const procResponse = await subtractorApi.process(processReqObj);
-            console.log('process:', procResponse);
-            window.location.href = 'http://localhost:3000/download';
-          }
-        });
-      } catch (exception) {
-        console.log(exception);
-      }
+      const procResponse = await subtractorApi.process(videoHashName);
+      console.log('process:', procResponse);
+      // TODO: redirect properly
+      window.location.href = 'http://localhost:3000/download';
+    } catch (exception) {
+      console.log(exception);
+      throw exception;
     }
     setVideoUrlBlob(null);
   };

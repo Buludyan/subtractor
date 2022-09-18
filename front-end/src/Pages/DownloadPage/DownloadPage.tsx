@@ -14,10 +14,8 @@ export const DownloadPage = () => {
       localStorage.getItem('videoName') || '{}'
     );
     const interval = setInterval(async () => {
-      const downloadReqObj = {
-        _guard: InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard,
-        videoHashName: nameObj.videoName,
-      };
+      const downloadReqObj =
+        InterfacesProjectSpecificInterfaces.newVideoHashName(nameObj.videoName);
       const downloadResponse = await subtractorApi.download(downloadReqObj);
       if (downloadResponse.status === 200) {
         setInProcess(false);

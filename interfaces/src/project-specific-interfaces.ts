@@ -3,16 +3,20 @@ export namespace InterfacesProjectSpecificInterfaces {
     _guard: TypeGuard;
   }
 
-  export const videoNameTypeGuard: 'videoNameTypeGuard' = 'videoNameTypeGuard';
+  export const videoOriginalNameTypeGuard: 'videoOriginalNameTypeGuard' =
+    'videoOriginalNameTypeGuard';
 
-  export interface IVideoName extends IGuard<typeof videoNameTypeGuard> {
-    videoName: string;
+  export interface IVideoOriginalName
+    extends IGuard<typeof videoOriginalNameTypeGuard> {
+    videoOriginalName: string;
   }
 
-  export const newVideoName = (videoName: string): IVideoName => {
+  export const newVideoOriginalName = (
+    videoOriginalName: string
+  ): IVideoOriginalName => {
     return {
-      _guard: videoNameTypeGuard,
-      videoName: videoName,
+      _guard: videoOriginalNameTypeGuard,
+      videoOriginalName: videoOriginalName,
     };
   };
 
@@ -31,16 +35,20 @@ export namespace InterfacesProjectSpecificInterfaces {
     };
   };
 
-  export const videoURLTypeGuard: 'videoURLTypeGuard' = 'videoURLTypeGuard';
+  export const subtitleSignedUrlTypeGuard: 'subtitleSignedUrlTypeGuard' =
+    'subtitleSignedUrlTypeGuard';
 
-  export interface IVideoURL extends IGuard<typeof videoURLTypeGuard> {
-    videoURL: string;
+  export interface ISubtitleSignedUrl
+    extends IGuard<typeof subtitleSignedUrlTypeGuard> {
+    subtitleSignedUrl: string;
   }
 
-  export const newVideoURL = (videoURL: string): IVideoURL => {
+  export const newSubtitleSignedUrl = (
+    subtitleSignedUrl: string
+  ): ISubtitleSignedUrl => {
     return {
-      _guard: videoURLTypeGuard,
-      videoURL,
+      _guard: subtitleSignedUrlTypeGuard,
+      subtitleSignedUrl,
     };
   };
 }

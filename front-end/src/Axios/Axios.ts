@@ -4,11 +4,11 @@ import axios, {AxiosResponse} from 'axios';
 
 const Axios = axios.create({
   baseURL:
-    'https://dxqqulh3qa.execute-api.eu-central-1.amazonaws.com/subtractor',
+    'https://3wkwu49uvd.execute-api.eu-central-1.amazonaws.com/subtractor',
 });
 
 export const subtractorApi = {
-  prepare(data: Interfaces.IVideoName): Promise<AxiosResponse> {
+  prepare(data: Interfaces.IVideoOriginalName): Promise<AxiosResponse> {
     return Axios.post('/prepare', data);
   },
 
