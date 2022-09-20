@@ -1,5 +1,7 @@
 import {useAppSelector} from '../../Hooks/Selector';
+
 import {UploadBtn} from '../UploadBtn/UploadBtn';
+
 import './VideoRecord.scss';
 
 export const VideoRecord = () => {

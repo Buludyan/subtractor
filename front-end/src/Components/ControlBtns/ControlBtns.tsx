@@ -1,11 +1,17 @@
+import {InterfacesProjectSpecificConstants} from 'interfaces';
+
 import React, {useState} from 'react';
+
 import fixWebmDuration from 'webm-duration-fix';
 import {RecordRTCPromisesHandler} from 'recordrtc';
+
 import {useActions} from '../../Hooks/Actions';
-import './ControlBtns.scss';
+
 import {IconButton} from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+
+import './ControlBtns.scss';
 
 export const ControlBtns = () => {
   const [recorder, setRecorder] = useState<RecordRTCPromisesHandler | null>();
@@ -39,6 +45,12 @@ export const ControlBtns = () => {
       setRecorder(null);
       setRecording(false);
       setRecordExist(true);
+      localStorage.setItem(
+        'videoName',
+        JSON.stringify({
+          videoName: InterfacesProjectSpecificConstants.webcamVideoName,
+        })
+      );
     }
   };
 
@@ -46,10 +58,10 @@ export const ControlBtns = () => {
     <div className="btns">
       <div className="btns__inner">
         <IconButton onClick={startRecording}>
-          <PlayArrowIcon />
+          <PlayArrowIcon fontSize="large" />
         </IconButton>
         <IconButton onClick={stopRecording}>
-          <StopIcon />
+          <StopIcon fontSize="large" />
         </IconButton>
       </div>
     </div>

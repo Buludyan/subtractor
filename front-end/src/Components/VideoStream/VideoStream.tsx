@@ -1,5 +1,7 @@
 import {useEffect, useRef} from 'react';
+
 import {useAppSelector} from '../../Hooks/Selector';
+
 import {ControlBtns} from '../ControlBtns/ControlBtns';
 
 import './VideoStream.scss';
@@ -8,10 +10,15 @@ export const VideoStream = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const {isRecording, videoUri} = useAppSelector(state => state.subtractor);
 
+  console.log(window.screen.width);
+
   const streamVideo = () => {
     navigator.mediaDevices
       .getUserMedia({
-        video: {width: 500, height: 300},
+        video:
+          window.screen.width <= 700
+            ? {width: 400, height: 250}
+            : {width: 692, height: 400},
       })
       .then(stream => {
         const video = videoRef.current;
@@ -30,11 +37,13 @@ export const VideoStream = () => {
 
   return (
     <div className="stream" style={{display: videoUri ? 'none' : 'inline'}}>
-      <ControlBtns />
-      <video
-        ref={videoRef}
-        className={isRecording ? 'stream__rec' : 'stream__pause'}
-      />
+      <div className="stream__inner">
+        <video
+          ref={videoRef}
+          className={isRecording ? 'stream__rec' : 'stream__pause'}
+        />
+        <ControlBtns />
+      </div>
     </div>
   );
 };

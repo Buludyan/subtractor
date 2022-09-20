@@ -1,20 +1,15 @@
-import React from 'react';
 import {
   InterfacesProjectSpecificConstants,
   InterfacesProjectSpecificInterfaces,
 } from 'interfaces';
-import {subtractorApi} from '../../Axios/Axios';
+
+import AWS from 'aws-sdk';
 import {useActions} from '../../Hooks/Actions';
 import {useAppSelector} from '../../Hooks/Selector';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import AWS from 'aws-sdk';
-import {IconButton} from '@mui/material';
+import {subtractorApi} from '../../Axios/Axios';
 
-// import newVideoOriginalName = InterfacesProjectSpecificInterfaces.newVideoOriginalName;
-// import IVideoHashName = InterfacesProjectSpecificInterfaces.IVideoHashName;
-// import videoHashNameTypeGuard = InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard;
-// import IGuard = InterfacesProjectSpecificInterfaces.IGuard;
-// import videoStoreName = InterfacesProjectSpecificConstants.videoStoreName;
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import {IconButton} from '@mui/material';
 
 if (
   !process.env.REACT_APP_AWS_ACCESS_KEY ||
@@ -53,11 +48,11 @@ export function makeSureThatXIs<T>(
 }
 
 export const UploadBtn = () => {
-  const {setVideoUrlBlob} = useActions();
+  const {setVideoUrlBlob, setProcess, setUploading} = useActions();
   const {videoBlob, videoFile, videoName} = useAppSelector(
     state => state.subtractor
   );
-  console.log(videoName, videoFile);
+
   const getCorrectVideoFile = (): File => {
     if (videoFile) {
       return videoFile;
@@ -73,9 +68,8 @@ export const UploadBtn = () => {
       return;
     }
 
+    setUploading(true);
     const mp4File = getCorrectVideoFile();
-    console.log(mp4File);
-
     try {
       const prepareReqObj =
         InterfacesProjectSpecificInterfaces.newVideoOriginalName(videoName);
@@ -98,8 +92,8 @@ export const UploadBtn = () => {
 
       const procResponse = await subtractorApi.process(videoHashName);
       console.log('process:', procResponse);
-      // TODO: redirect properly
-      window.location.href = 'http://localhost:3000/download';
+      setUploading(false);
+      setProcess(true);
     } catch (exception) {
       console.log(exception);
       throw exception;
@@ -110,7 +104,7 @@ export const UploadBtn = () => {
   return (
     <div>
       <IconButton onClick={uploadVideo}>
-        <FileUploadIcon />
+        <FileUploadIcon fontSize="large" />
       </IconButton>
     </div>
   );

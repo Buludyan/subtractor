@@ -1,6 +1,8 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {InitialState} from '../Interfaces/Interfaces';
 import {InterfacesProjectSpecificConstants} from 'interfaces';
+
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
+import {InitialState} from '../Interfaces/Interfaces';
 
 const initialState: InitialState = {
   isRecording: false,
@@ -10,6 +12,9 @@ const initialState: InitialState = {
   videoFile: null,
   videoName: InterfacesProjectSpecificConstants.webcamVideoName,
   videoUri: null,
+  isUploading: false,
+  isInProcess: false,
+  isDone: false,
 };
 
 export const subtractorSlice = createSlice({
@@ -34,6 +39,15 @@ export const subtractorSlice = createSlice({
     },
     setVideoUri: (state, action: PayloadAction<string | null>) => {
       state.videoUri = action.payload;
+    },
+    setUploading: (state, action: PayloadAction<boolean>) => {
+      state.isUploading = action.payload;
+    },
+    setProcess: (state, action: PayloadAction<boolean>) => {
+      state.isInProcess = action.payload;
+    },
+    setDone: (state, action: PayloadAction<boolean>) => {
+      state.isDone = action.payload;
     },
   },
 });

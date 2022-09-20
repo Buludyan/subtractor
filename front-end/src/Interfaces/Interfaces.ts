@@ -6,4 +6,7 @@ export interface InitialState {
   videoFile: File | null;
   videoName: string;
   videoUri: string | null;
+  isUploading: boolean;
+  isInProcess: boolean;
+  isDone: boolean;
 }
