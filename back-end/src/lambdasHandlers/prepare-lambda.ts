@@ -4,6 +4,7 @@ import {CoreDynamoDb} from 'core';
 import {InterfacesProjectSpecificInterfaces} from 'interfaces';
 import {InterfacesProjectSpecificConstants} from 'interfaces';
 import {CoreLog} from 'core';
+import * as md5 from 'md5';
 
 export namespace BackEndPrepareLambda {
   import isNull = CoreCommonUtils.isNull;
@@ -43,8 +44,12 @@ export namespace BackEndPrepareLambda {
         videoOriginalNameTypeGuard
       );
 
-      // TODO: add hashing logic
-      const hashedVideoName = body.videoOriginalName;
+      const extention = body.videoOriginalName.substring(
+        body.videoOriginalName.lastIndexOf('.') + 1
+      );
+      const hashedVideoName = `${md5(
+        body.videoOriginalName.concat(Date.now().toString())
+      )}.${extention}`;
 
       await myTable.putRecord(
         hashedVideoName,

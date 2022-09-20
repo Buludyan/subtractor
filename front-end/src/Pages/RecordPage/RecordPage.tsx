@@ -43,12 +43,6 @@ export const RecordPage = () => {
   const selectVideoHandler = (evt: ChangeEvent<HTMLInputElement>) => {
     if (evt.target.files !== null) {
       const file: File = evt.target.files[0];
-      localStorage.setItem(
-        'videoName',
-        JSON.stringify({
-          videoName: file.name,
-        })
-      );
       setVideoFile(file);
       fileToDataUri(file).then(videoUri => {
         setVideoUri(videoUri as string);

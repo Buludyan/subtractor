@@ -45,12 +45,6 @@ export const ControlBtns = () => {
       setRecorder(null);
       setRecording(false);
       setRecordExist(true);
-      localStorage.setItem(
-        'videoName',
-        JSON.stringify({
-          videoName: InterfacesProjectSpecificConstants.webcamVideoName,
-        })
-      );
     }
   };
 

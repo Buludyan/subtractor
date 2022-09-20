@@ -105,6 +105,7 @@ const initiate = async () => {
   await transcribeOutputStore.setCors(['GET']);
 
   console.log(apiUrl);
+  process.env['REACT_APP_API_URL'] = apiUrl;
 };
 
 const demolish = async () => {
@@ -148,7 +149,7 @@ const demolish = async () => {
 
 const main = async () => {
   // await demolish();
-  await sleep(5000);
+  // await sleep(5000);
   await initiate();
   await sleep(600000);
   //await demolish();

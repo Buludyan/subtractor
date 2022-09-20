@@ -81,6 +81,13 @@ export const UploadBtn = () => {
         InterfacesProjectSpecificInterfaces.videoHashNameTypeGuard
       );
 
+      localStorage.setItem(
+        'videoHashName',
+        JSON.stringify({
+          videoHashName: videoHashName.videoHashName,
+        })
+      );
+
       const putObjectParams = {
         ACL: 'public-read',
         Body: mp4File,
