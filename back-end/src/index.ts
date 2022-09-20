@@ -105,7 +105,7 @@ const initiate = async () => {
   await transcribeOutputStore.setCors(['GET']);
 
   console.log(apiUrl);
-  process.env['REACT_APP_API_URL'] = apiUrl;
+  console.log("Don't forget to change url in front-end in Axios.ts!");
 };
 
 const demolish = async () => {
