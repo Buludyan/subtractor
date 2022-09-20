@@ -63,8 +63,19 @@ export namespace BackEndDownloadLambda {
         videoOriginalNameTypeGuard
       );
       const originalName = await videoNameTable.getRecord(body.videoHashName);
-
-      await transcribeOutputStore.setAclToFile(subtitleHashName, true);
+      try {
+        await transcribeOutputStore.setAclToFile(subtitleHashName, true);
+      } catch (err) {
+        return {
+          statusCode: 204,
+          body: '',
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Content-Type': 'application/json',
+          },
+        };
+      }
 
       const subtitleName = originalName.videoOriginalName + '.srt';
       const videoFileURL = await transcribeOutputStore.getSignedURL(

@@ -148,8 +148,10 @@ export namespace CoreS3Bucket {
           // TODO: refine this
           return true;
         },
-        async (): Promise<boolean | null> => {
-          // TODO: what if file is not found?
+        async (err: AWSError): Promise<boolean | null> => {
+          if (err.code === 'NoSuchKey') {
+            return false;
+          }
           return null;
         }
       );

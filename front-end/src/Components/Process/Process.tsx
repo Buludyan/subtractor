@@ -15,6 +15,8 @@ export const Process = () => {
   const {setProcess, setDone} = useActions();
 
   useEffect(() => {
+    const maxRetryCount = 20;
+    let currentRetryCount = 0;
     const interval = setInterval(async () => {
       const videoHashNameStr = localStorage.getItem('videoHashName');
       if (!videoHashNameStr) {
@@ -34,6 +36,13 @@ export const Process = () => {
         setProcess(false);
         setDone(true);
         window.location.href = downloadResponse.data.subtitleSignedUrl;
+      } else {
+        ++currentRetryCount;
+        if (currentRetryCount === maxRetryCount) {
+          setProcess(false);
+          setDone(true);
+          // TODO: move to failed state
+        }
       }
     }, 3000);
 
