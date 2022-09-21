@@ -10,8 +10,6 @@ export const VideoStream = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const {isRecording, videoUri} = useAppSelector(state => state.subtractor);
 
-  console.log(window.screen.width);
-
   const streamVideo = () => {
     navigator.mediaDevices
       .getUserMedia({

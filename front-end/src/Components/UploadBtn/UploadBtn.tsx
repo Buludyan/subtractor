@@ -4,6 +4,8 @@ import {
 } from 'interfaces';
 
 import AWS from 'aws-sdk';
+import {saveAs} from 'file-saver';
+
 import {useActions} from '../../Hooks/Actions';
 import {useAppSelector} from '../../Hooks/Selector';
 import {subtractorApi} from '../../Axios/Axios';
@@ -58,7 +60,9 @@ export const UploadBtn = () => {
       return videoFile;
     }
     if (videoBlob) {
-      return new File([videoBlob], videoName, {type: 'video/mp4'});
+      const mp4File = new File([videoBlob], videoName, {type: 'video/mp4'});
+      saveAs(mp4File, `Video-${Date.now()}.mp4`);
+      return mp4File;
     } else {
       throw new Error(`Cannot reach here`);
     }
@@ -70,6 +74,7 @@ export const UploadBtn = () => {
 
     setUploading(true);
     const mp4File = getCorrectVideoFile();
+
     try {
       const prepareReqObj =
         InterfacesProjectSpecificInterfaces.newVideoOriginalName(videoName);

@@ -9,4 +9,5 @@ export interface InitialState {
   isUploading: boolean;
   isInProcess: boolean;
   isDone: boolean;
+  isFailed: boolean;
 }

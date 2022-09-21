@@ -3,7 +3,7 @@ import {InterfacesProjectSpecificInterfaces as Interfaces} from 'interfaces';
 import axios, {AxiosResponse} from 'axios';
 
 const Axios = axios.create({
-  baseURL: `https://irfs8iquw9.execute-api.eu-central-1.amazonaws.com/subtractor`,
+  baseURL: `https://dr00fm796h.execute-api.eu-central-1.amazonaws.com/subtractor`,
 });
 
 export const subtractorApi = {

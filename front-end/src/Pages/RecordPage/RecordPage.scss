@@ -15,7 +15,7 @@
   &__title {
     font-weight: bold;
     font-size: 70px;
-    height: 10%;
+    height: 90px;
     padding: 15px 0;
     width: 100%;
   }
@@ -24,7 +24,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 15%;
+    height: 100px;
     width: 100%;
   }
 }
@@ -54,12 +54,10 @@
 
     &__title {
       font-size: 60px;
-      height: 7%;
       padding: 10px 0;
     }
 
     &__description {
-      height: 12%;
       width: 70%;
     }
   }

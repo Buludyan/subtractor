@@ -3,7 +3,6 @@ import {InterfacesProjectSpecificInterfaces} from 'interfaces';
 import React, {useEffect} from 'react';
 
 import {useActions} from '../../Hooks/Actions';
-import {useAppSelector} from '../../Hooks/Selector';
 import {subtractorApi} from '../../Axios/Axios';
 
 import CircularProgress from '@mui/material/CircularProgress';
@@ -12,7 +11,7 @@ import Box from '@mui/material/Box';
 import './Process';
 
 export const Process = () => {
-  const {setProcess, setDone} = useActions();
+  const {setProcess, setDone, setFailed} = useActions();
 
   useEffect(() => {
     const maxRetryCount = 20;
@@ -41,13 +40,13 @@ export const Process = () => {
         if (currentRetryCount === maxRetryCount) {
           setProcess(false);
           setDone(true);
-          // TODO: move to failed state
+          setFailed(true);
         }
       }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [setDone, setProcess]);
+  }, [setDone, setProcess, setFailed]);
 
   return (
     <div className="dowload">

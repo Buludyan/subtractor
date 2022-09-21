@@ -15,6 +15,7 @@ const initialState: InitialState = {
   isUploading: false,
   isInProcess: false,
   isDone: false,
+  isFailed: false,
 };
 
 export const subtractorSlice = createSlice({
@@ -48,6 +49,9 @@ export const subtractorSlice = createSlice({
     },
     setDone: (state, action: PayloadAction<boolean>) => {
       state.isDone = action.payload;
+    },
+    setFailed: (state, action: PayloadAction<boolean>) => {
+      state.isFailed = action.payload;
     },
   },
 });

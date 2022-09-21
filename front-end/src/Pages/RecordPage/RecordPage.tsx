@@ -19,7 +19,7 @@ export const RecordPage = () => {
     setRecordExist,
     setVideoUrlBlob,
   } = useActions();
-  const {isWebcamOn, videoUri, isInProcess, isDone, isUploading} =
+  const {isWebcamOn, videoUri, isInProcess, isDone, isUploading, isFailed} =
     useAppSelector(state => state.subtractor);
 
   const webcamHandler = () => {
@@ -55,7 +55,9 @@ export const RecordPage = () => {
       <div className="recordPage__inner">
         <p className="recordPage__title">Subtractor</p>
         <div className="recordPage__description">
-          {isUploading ? (
+          {isFailed ? (
+            <p>Error. File not found.</p>
+          ) : isUploading ? (
             <p>Uploading video.</p>
           ) : isDone ? (
             <p>Subtitles are ready!</p>

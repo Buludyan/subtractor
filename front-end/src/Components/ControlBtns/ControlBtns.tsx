@@ -1,5 +1,3 @@
-import {InterfacesProjectSpecificConstants} from 'interfaces';
-
 import React, {useState} from 'react';
 
 import fixWebmDuration from 'webm-duration-fix';
